@@ -32,7 +32,7 @@ const company = [
     <a href="/contact" data-open-inquiry class="btn-primary">Get Started <Icon name="arrow-right" size={16} /></a>
   </div>
 
-  <div class="relative z-10 container-pf grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-12">
+  <div class="relative z-10 container-pf grid gap-10 pb-4 pt-14 sm:grid-cols-2 lg:grid-cols-12">
     <div class="lg:col-span-4">
       <Logo />
       <p class="mt-4 max-w-sm text-sm leading-relaxed text-muted">{SITE.description}</p>
@@ -89,27 +89,27 @@ const company = [
     </nav>
   </div>
 
+  <!-- Watermark: slim band, fully visible (no cut-off letters) -->
+  <div class="relative z-10 container-pf pb-1 pt-2" aria-hidden="true">
+    <svg class="mx-auto block h-[13vw] max-h-[112px] w-auto" viewBox="0 0 1000 150" role="presentation" focusable="false">
+      <text x="500" y="122" text-anchor="middle" font-family="Space Grotesk Variable, Space Grotesk, sans-serif" font-weight="700" font-size="170" letter-spacing="-8" fill="#1B1D23">PeriodicFit</text>
+    </svg>
+  </div>
+
+  <!-- Legal bar: always the very last thing on the page, compact -->
   <div class="relative z-10 border-t border-line">
-    <div class="relative z-10 container-pf py-6">
-      <p class="text-xs leading-relaxed text-muted">
-        <strong class="text-ink/80">Disclaimer:</strong> Content on {SITE.name} is for general information and education only and is not medical advice.
-        Consult a qualified doctor before starting any exercise or nutrition program, especially if you have a medical condition, are pregnant, or take medication.{" "}
-        <a href="/disclaimer" class="underline underline-offset-2 hover:text-primary">Read the full disclaimer</a>.
-      </p>
-      <div class="mt-5 flex flex-col gap-4 text-xs text-muted md:flex-row md:items-center md:justify-between">
+    <div class="container-pf py-4">
+      <div class="flex flex-col gap-3 text-xs text-muted md:flex-row md:items-center md:justify-between">
         <p>© {year} {SITE.name}. All rights reserved.</p>
-        <ul class="flex flex-wrap gap-x-5 gap-y-2">
+        <ul class="flex flex-wrap gap-x-4 gap-y-1.5">
           {LEGAL_LINKS.map((l) => <li><a href={l.href} class="hover:text-primary">{l.label}</a></li>)}
           <li><button type="button" data-cookie-settings class="hover:text-primary">Cookie settings</button></li>
         </ul>
       </div>
+      <p class="mt-2.5 text-[0.7rem] leading-relaxed text-muted/80">
+        <strong class="font-semibold text-ink/70">Disclaimer:</strong> Content on {SITE.name} is general information, not medical advice. Consult a qualified doctor before starting any exercise or nutrition program.{" "}
+        <a href="/disclaimer" class="underline underline-offset-2 hover:text-primary">Read the full disclaimer</a>.
+      </p>
     </div>
-  </div>
-
-  <!-- Giant watermark in its own band below the legal row (never behind text) -->
-  <div class="relative overflow-hidden" aria-hidden="true">
-    <svg class="block w-full" viewBox="0 0 1000 135" preserveAspectRatio="xMidYMin slice" role="presentation" focusable="false">
-      <text x="500" y="160" text-anchor="middle" font-family="Space Grotesk Variable, Space Grotesk, sans-serif" font-weight="700" font-size="200" letter-spacing="-10" fill="#17191E">PeriodicFit</text>
-    </svg>
   </div>
 </footer>
