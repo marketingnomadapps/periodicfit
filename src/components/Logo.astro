@@ -1,15 +1,34 @@
 ---
-interface Props { class?: string; light?: boolean }
-const { class: className = '', light = false } = Astro.props;
+/**
+ * PeriodicFit logo: geometric "P" mark (traced from the brand logo) + wordmark.
+ * Animated with CSS only (CSP-safe): the two halves of the P fly in and lock together
+ * on load, and part slightly on hover. Disabled for prefers-reduced-motion.
+ */
+interface Props { class?: string; light?: boolean; animate?: boolean }
+const { class: className = '', light = false, animate = true } = Astro.props;
 ---
-<a href="/" class:list={['group inline-flex items-center gap-2.5', className]} aria-label="PeriodicFit home">
-  <!-- Mark: a rising pulse line inside a rounded square (progress over time) -->
-  <span class="grid h-9 w-9 place-items-center rounded-[11px] bg-primary text-night transition-transform duration-500 ease-out-expo group-hover:-rotate-6" aria-hidden="true">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 15h4l2.5-6 4 10 2.5-6H21" />
-    </svg>
-  </span>
-  <span class:list={['font-display text-lg font-bold tracking-tight', light ? 'text-text' : 'text-ink']}>
-    Periodic<span class={light ? 'text-[#C2410C]' : 'text-primary'}>Fit</span>
+<a href="/" class:list={['pf-logo group inline-flex items-center gap-2.5', animate && 'pf-logo--anim', className]} aria-label="PeriodicFit home">
+  <svg class:list={['pf-mark h-9 w-auto shrink-0 overflow-visible', light ? 'text-[#6E9E14]' : 'text-primary']} viewBox="0 0 590 772" aria-hidden="true" focusable="false">
+    <polygon class="pf-top" fill="currentColor" points="0,0 412,0 590,181 590,409 417,409 417,174 0,174" />
+    <polygon class="pf-bottom" fill="currentColor" points="0,409 417,409 417,583 174,583 174,772 0,599" />
+  </svg>
+  <span class:list={['font-display text-[1.05rem] font-bold uppercase leading-none tracking-[0.2em]', light ? 'text-text' : 'text-ink']}>
+    Periodic<span class={light ? 'text-[#5B8510]' : 'text-primary'}>Fit</span>
   </span>
 </a>
+
+<style>
+  .pf-mark polygon { transform-box: view-box; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .pf-logo:hover .pf-top, .pf-logo:focus-visible .pf-top { transform: translate(28px, -28px); }
+  .pf-logo:hover .pf-bottom, .pf-logo:focus-visible .pf-bottom { transform: translate(-28px, 28px); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pf-logo--anim .pf-top { animation: pf-in-top 1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+    .pf-logo--anim .pf-bottom { animation: pf-in-bottom 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+    .pf-logo--anim > span { animation: pf-in-word 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both; }
+  }
+  @keyframes pf-in-top { from { transform: translate(260px, -260px) rotate(12deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes pf-in-bottom { from { transform: translate(-260px, 260px) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes pf-in-word { from { opacity: 0; letter-spacing: 0.6em; } to { opacity: 1; letter-spacing: 0.2em; } }
+  @media (prefers-reduced-motion: reduce) { .pf-mark polygon { transition: none; } }
+</style>

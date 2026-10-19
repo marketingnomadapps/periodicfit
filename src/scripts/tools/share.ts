@@ -50,14 +50,18 @@ export async function drawCard(d: CardData): Promise<HTMLCanvasElement> {
   g.addColorStop(0, 'rgba(198,255,61,0.22)'); g.addColorStop(1, 'rgba(198,255,61,0)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-  // Brand
-  roundRect(ctx, P, P, 64, 64, 18); ctx.fillStyle = C.lime; ctx.fill();
-  ctx.strokeStyle = C.bg; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath(); ctx.moveTo(P + 9, P + 38); ctx.lineTo(P + 21, P + 38); ctx.lineTo(P + 28, P + 22); ctx.lineTo(P + 39, P + 49); ctx.lineTo(P + 46, P + 33); ctx.lineTo(P + 56, P + 33); ctx.stroke();
-  ctx.font = `700 40px ${DISPLAY}`; ctx.fillStyle = C.ink; ctx.textBaseline = 'middle';
-  ctx.fillText('Periodic', P + 84, P + 33);
-  const pw = ctx.measureText('Periodic').width;
-  ctx.fillStyle = C.lime; ctx.fillText('Fit', P + 84 + pw, P + 33);
+  // Brand: the "P" mark + uppercase wordmark
+  const markH = 64, k = markH / 772;
+  ctx.fillStyle = C.lime;
+  const poly = (pts: number[][]) => { ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(P + x * k, P + y * k) : ctx.moveTo(P + x * k, P + y * k))); ctx.closePath(); ctx.fill(); };
+  poly([[0, 0], [412, 0], [590, 181], [590, 409], [417, 409], [417, 174], [0, 174]]);
+  poly([[0, 409], [417, 409], [417, 583], [174, 583], [174, 772], [0, 599]]);
+  ctx.font = `700 34px ${DISPLAY}`; ctx.textBaseline = 'middle';
+  (ctx as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = '6px';
+  ctx.fillStyle = C.ink; ctx.fillText('PERIODIC', P + 72, P + 33);
+  const pw = ctx.measureText('PERIODIC').width;
+  ctx.fillStyle = C.lime; ctx.fillText('FIT', P + 72 + pw, P + 33);
+  (ctx as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = '0px';
 
   // Tool pill
   ctx.font = `600 26px ${SANS}`;
