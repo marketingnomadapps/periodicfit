@@ -1,8 +1,12 @@
 ---
 import { Image } from 'astro:assets';
 import Icon from '../Icon.astro';
-import { LATEST_POSTS } from '../../data/home';
+import PostImage from '../blog/PostImage.astro';
+import { getTeaserPosts } from '../../lib/posts';
+import { IMG } from '../../data/images';
+const posts = await getTeaserPosts(3);
 ---
+{posts.length > 0 && (
 <section id="journal" data-section-bg="#0E0F12" class="relative py-28 md:py-36">
   <div class="container-pf">
     <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -13,13 +17,15 @@ import { LATEST_POSTS } from '../../data/home';
       <a href="/blog" class="btn-secondary self-start md:self-auto">All articles <Icon name="arrow-right" size={16} /></a>
     </div>
     <ul class="grid gap-8 md:grid-cols-3">
-      {LATEST_POSTS.map((p, i) => (
+      {posts.map((p, i) => (
         <li data-reveal data-reveal-delay={String(i * 0.08)}>
-          <a href={p.href} class="group block">
-            <div class="aspect-[4/3] overflow-hidden rounded-card">
-              <Image src={p.img} alt={p.alt} widths={[400, 700]} sizes="(min-width: 768px) 33vw, 100vw" class="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105" />
+          <a href={`/blog/${p.slug}`} class="group block">
+            <div class="aspect-[4/3] overflow-hidden rounded-card bg-surface">
+              {p.image
+                ? <PostImage image={p.image} sizes="(min-width: 768px) 33vw, 100vw" class="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105" />
+                : <Image src={IMG.nutrition} alt="" widths={[400, 700]} sizes="(min-width: 768px) 33vw, 100vw" class="h-full w-full object-cover opacity-60 transition-transform duration-700 ease-out-expo group-hover:scale-105" />}
             </div>
-            <p class="mt-5 text-xs font-semibold uppercase tracking-[0.15em] text-primary">{p.category}</p>
+            <p class="mt-5 text-xs font-semibold uppercase tracking-[0.15em] text-primary">{p.category.name} · {p.readingTime} min read</p>
             <h3 class="mt-2 text-xl font-semibold leading-snug group-hover:text-primary">{p.title}</h3>
           </a>
         </li>
@@ -27,3 +33,4 @@ import { LATEST_POSTS } from '../../data/home';
     </ul>
   </div>
 </section>
+)}

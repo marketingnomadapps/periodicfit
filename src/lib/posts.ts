@@ -181,3 +181,11 @@ export function splitAfterParagraph(html: string, n = 3): [string, string] {
   for (let i = 0; i < n; i++) { idx = html.indexOf('</p>', from); if (idx === -1) return [html, '']; from = idx + 4; }
   return [html.slice(0, from), html.slice(from)];
 }
+
+/** Latest posts for teasers (home / service pages). Prefers posts in `preferCategory` (slug). */
+export async function getTeaserPosts(n = 3, preferCategory?: string) {
+  const posts = await getPosts();
+  if (!preferCategory) return posts.slice(0, n);
+  const inCat = posts.filter((p) => p.categories.some((c) => c.slug === preferCategory));
+  return [...inCat, ...posts.filter((p) => !inCat.includes(p))].slice(0, n);
+}
