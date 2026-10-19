@@ -20,8 +20,8 @@ export default defineConfig({
     sitemap({ filter: (page) => !page.includes('/404') }),
     securityHeaders({
       // Only these third parties may be contacted from the browser:
-      connect: ['https://api.web3forms.com', 'https://challenges.cloudflare.com', ...ga.connect],
-      scripts: ['https://challenges.cloudflare.com', ...ga.scripts], // Cloudflare Turnstile (anti-bot) + GA4 if set
+      connect: ['https://api.web3forms.com', 'https://challenges.cloudflare.com', 'https://cloudflareinsights.com', ...ga.connect],
+      scripts: ['https://challenges.cloudflare.com', 'https://static.cloudflareinsights.com', ...ga.scripts], // Turnstile (anti-bot), Cloudflare Web Analytics (cookieless), GA4 if set
       frames: ['https://challenges.cloudflare.com', 'https://www.youtube-nocookie.com'], // Turnstile + YouTube embeds in blog posts
       images: [...(WP ? [WP] : []), ...ga.images], // WordPress media library for blog images
       // TODO: when GA4 / AdSense are switched on, add their domains here (and only then).
