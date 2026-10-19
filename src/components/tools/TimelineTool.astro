@@ -1,0 +1,80 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+import ActivitySelect from './ActivitySelect.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs weightLabel="Current weight" defaults={{ kg: 82 }} />
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      <label class="t-field" data-unit="metric"><span class="t-label">Goal weight</span><span class="t-input"><input type="number" name="goal_kg" inputmode="decimal" step="0.5" value="74" /><em>kg</em></span></label>
+      <label class="t-field" data-unit="imperial" hidden><span class="t-label">Goal weight</span><span class="t-input"><input type="number" name="goal_lb" inputmode="decimal" step="1" value="163" /><em>lb</em></span></label>
+      <label class="t-field"><span class="t-label">Pace</span>
+        <select name="pace" class="t-select"><option value="gentle">Gentle</option><option value="steady" selected>Steady</option><option value="ambitious">Ambitious</option></select>
+      </label>
+    </div>
+    <ActivitySelect />
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70" data-out="kicker">You can reach your goal by</p>
+    <p class="mt-1 t-result-num text-5xl md:text-6xl" data-out="date">–</p>
+    <p class="mt-2 text-sm text-muted"><span data-out="weeks">0</span> weeks · <span data-out="rate">–</span></p>
+    <ol class="mt-6 space-y-2" data-out="phases"></ol>
+    <p class="mt-4 text-xs text-muted" data-out="note"></p>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bmr, ACTIVITY, bodyMetrics, num, str, wireTool, emitResult, shareUrl, round, fmt, KG_PER_LB, type Sex } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="transformation-timeline"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    // Weekly change as % of body weight. Loss: 0.5 / 0.75 / 1.0 %. Gain: 0.15 / 0.25 / 0.4 %.
+    const PACE = { gentle: [0.005, 0.0015], steady: [0.0075, 0.0025], ambitious: [0.01, 0.004] } as const;
+    const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    wireTool(form, () => {
+      const { cm, kg, unit } = bodyMetrics(form);
+      const age = num(form, 'age'); const sex = (str(form, 'sex') || 'male') as Sex;
+      const goal = unit === 'imperial' ? num(form, 'goal_lb') * KG_PER_LB : num(form, 'goal_kg');
+      if (!(cm > 100 && kg > 30 && goal > 30 && age >= 15)) return;
+      const k = unit === 'imperial' ? 2.20462 : 1, u = unit === 'imperial' ? 'lb' : 'kg';
+      const losing = goal < kg;
+      const diff = Math.abs(kg - goal);
+      const out = (s: string) => root.querySelector<HTMLElement>(`[data-out="${s}"]`)!;
+      if (diff < 0.5) { out('date').textContent = 'You\'re there'; out('phases').innerHTML = ''; return; }
+      const pace = PACE[(str(form, 'pace') || 'steady') as keyof typeof PACE][losing ? 0 : 1];
+      // Week-by-week simulation (rate scales with current weight)
+      let w = kg, weeks = 0;
+      while ((losing ? w > goal : w < goal) && weeks < 260) { w += (losing ? -1 : 1) * w * pace; weeks++; }
+      const avgWeekly = diff / weeks;
+      const tdee = bmr(sex, kg, cm, age) * (ACTIVITY[str(form, 'activity')]?.f ?? 1.55);
+      const daily = (kg * pace * 7700) / 7;              // ~7,700 kcal per kg of body weight
+      const floor = sex === 'male' ? 1500 : 1200;
+      const target = Math.max(floor, round(tdee + (losing ? -daily : daily), -1));
+      const end = new Date(); end.setDate(end.getDate() + weeks * 7);
+      // Periodized phases
+      const p1 = Math.max(2, Math.round(weeks * 0.25)), p3 = Math.max(1, Math.round(weeks * 0.2)), p2 = Math.max(1, weeks - p1 - p3);
+      const phases = [
+        { n: 'Foundation', w: p1, d: losing ? 'Build habits, learn the lifts, 7–8k steps.' : 'Learn technique, small surplus, track lifts.' },
+        { n: 'Build', w: p2, d: losing ? `Steady deficit around ${fmt(target)} kcal, progressive training.` : `Surplus around ${fmt(target)} kcal, add volume every block.` },
+        { n: 'Peak', w: p3, d: losing ? 'Fine-tune food, keep strength, plan a diet break.' : 'Push key lifts, then deload.' },
+        { n: 'Maintain', w: 4, d: 'Raise calories to maintenance and lock in the result.' },
+      ];
+      out('kicker').textContent = losing ? 'You can reach your goal by' : 'You can build up to your goal by';
+      out('date').textContent = dateFmt.format(end);
+      out('weeks').textContent = String(weeks);
+      out('rate').textContent = `≈ ${fmt(avgWeekly * k, 2)} ${u}/week · start at ${fmt(target)} kcal/day`;
+      out('phases').innerHTML = phases.map((p, i) => `<li class="flex gap-3 rounded-2xl border ${i === 1 ? 'border-primary/50 bg-primary/10' : 'border-line bg-night/50'} p-3">
+        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary font-display text-sm font-bold text-night">${i + 1}</span>
+        <span><span class="font-semibold">${p.n}</span> <span class="text-xs text-muted">· ${p.w} weeks</span><span class="block text-xs text-ink/70">${p.d}</span></span></li>`).join('');
+      out('note').textContent = target === floor ? `Calories are capped at ${fmt(floor)} kcal for safety, so progress may be slower than shown.` : 'Real progress is never a straight line. Use the weekly average, not daily weigh-ins.';
+      emitResult(form, {
+        tool: 'Transformation Timeline', kicker: losing ? 'My goal date' : 'My build-up date', hero: dateFmt.format(end),
+        heroUnit: `${fmt(kg * k, 1)} → ${fmt(goal * k, 1)} ${u} in ${weeks} weeks`,
+        list: phases.map((p) => `${p.n}: ${p.w} weeks`),
+        shareText: `I'm going from ${fmt(kg * k, 1)} to ${fmt(goal * k, 1)} ${u} by ${dateFmt.format(end)}. Plan yours free:`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

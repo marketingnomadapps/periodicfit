@@ -1,0 +1,164 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { NAV } from '../config/site';
+
+interface Props {
+  /** Transparent over a dark hero until the user scrolls. */
+  transparent?: boolean;
+  /** Light theme (blog reading pages). */
+  light?: boolean;
+}
+const { transparent = false, light = false } = Astro.props;
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href.split('/').slice(0, 2).join('/')));
+---
+<header
+  id="site-header"
+  data-transparent={transparent ? 'true' : 'false'}
+  data-light={light ? 'true' : 'false'}
+  class="site-header fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500"
+>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-[60] focus:rounded-pill focus:bg-primary focus:px-4 focus:py-2 focus:text-night">
+    Skip to content
+  </a>
+  <div class="container-pf flex h-16 items-center justify-between gap-6 lg:h-20">
+    <Logo light={light} />
+
+    <nav aria-label="Primary" class="hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {NAV.map((item) => (
+          <li class="group relative">
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+              class:list={[
+                'nav-link inline-flex items-center gap-1 rounded-pill px-4 py-2 text-sm font-medium transition-colors',
+                isActive(item.href) && 'is-active',
+              ]}
+            >
+              {item.label}
+              {'children' in item && <Icon name="chevron-down" size={14} class="transition-transform group-hover:rotate-180 group-focus-within:rotate-180" />}
+            </a>
+            {'children' in item && (
+              <div class="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 translate-y-2 pt-3 opacity-0 transition-all duration-300 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                <ul class="rounded-card border border-line bg-surface p-2 shadow-2xl shadow-black/40">
+                  {item.children.map((c) => (
+                    <li>
+                      <a href={c.href} class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink/85 transition-colors hover:bg-surface-2 hover:text-primary">
+                        {'icon' in c && (
+                          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-surface-2 text-primary"><Icon name={c.icon} size={16} /></span>
+                        )}
+                        {c.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="/contact" data-open-inquiry class="btn-primary hidden sm:inline-flex">Book Free Consultation</a>
+      <button
+        id="menu-toggle"
+        type="button"
+        class="menu-toggle grid h-11 w-11 place-items-center rounded-pill border lg:hidden"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label="Open menu"
+      >
+        <Icon name="menu" size={22} class="icon-open" />
+        <Icon name="x" size={22} class="icon-close hidden" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="mobile-menu fixed inset-x-0 bottom-0 top-16 hidden overflow-y-auto bg-night lg:hidden" data-lenis-prevent>
+    <nav aria-label="Mobile" class="container-pf py-6">
+      <ul class="divide-y divide-line">
+        {NAV.map((item) => (
+          <li class="py-1">
+            {'children' in item ? (
+              <details class="group">
+                <summary class="flex cursor-pointer list-none items-center justify-between py-3 font-display text-xl font-semibold text-ink">
+                  {item.label}
+                  <Icon name="chevron-down" size={20} class="text-muted transition-transform group-open:rotate-180" />
+                </summary>
+                <ul class="grid grid-cols-1 gap-1 pb-3">
+                  <li><a href={item.href} class="block rounded-xl px-3 py-2 text-sm font-semibold text-primary">All {item.label.toLowerCase()}</a></li>
+                  {item.children.map((c) => (
+                    <li>
+                      <a href={c.href} class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-ink/80 hover:bg-surface">
+                        {'icon' in c && <Icon name={c.icon} size={16} class="text-primary" />}
+                        {c.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : (
+              <a href={item.href} class="block py-3 font-display text-xl font-semibold text-ink">{item.label}</a>
+            )}
+          </li>
+        ))}
+      </ul>
+      <a href="/contact" data-open-inquiry class="btn-primary mt-8 w-full">Book Free Consultation</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  /* Solid state (default, or after scroll on transparent pages) */
+  .site-header { background: rgb(14 15 18 / 0.82); backdrop-filter: blur(14px); border-bottom: 1px solid var(--color-line); }
+  .site-header[data-transparent='true']:not(.is-scrolled):not(.menu-open) { background: transparent; backdrop-filter: none; border-color: transparent; }
+  .nav-link { color: rgb(244 245 247 / 0.8); }
+  .nav-link:hover, .nav-link.is-active { color: var(--color-primary); }
+  .menu-toggle { color: var(--color-ink); border-color: rgb(244 245 247 / 0.2); }
+
+  /* Light theme (blog) */
+  .site-header[data-light='true'] { background: rgb(255 255 255 / 0.88); border-bottom-color: #E6E8EC; }
+  .site-header[data-light='true'] .nav-link { color: var(--color-text-muted); }
+  .site-header[data-light='true'] .nav-link:hover,
+  .site-header[data-light='true'] .nav-link.is-active { color: var(--color-text); }
+  .site-header[data-light='true'] .menu-toggle { color: var(--color-text); border-color: #D9DCE1; }
+</style>
+
+<script>
+  import { stopScroll, startScroll } from '../scripts/lenis';
+
+  const header = document.getElementById('site-header')!;
+  const toggle = document.getElementById('menu-toggle') as HTMLButtonElement;
+  const menu = document.getElementById('mobile-menu')!;
+
+  // Solid header after scrolling
+  const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 12);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const setOpen = (open: boolean) => {
+    menu.classList.toggle('hidden', !open);
+    header.classList.toggle('menu-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    toggle.querySelector('.icon-open')?.classList.toggle('hidden', open);
+    toggle.querySelector('.icon-close')?.classList.toggle('hidden', !open);
+    if (open) {
+      stopScroll();
+      menu.querySelector<HTMLElement>('a, summary')?.focus();
+    } else {
+      startScroll();
+    }
+  };
+
+  toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') { setOpen(false); toggle.focus(); }
+  });
+  menu.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) setOpen(false); });
+  window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+</script>

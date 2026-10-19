@@ -1,0 +1,115 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { SITE, CONTACT, SOCIAL, SERVICES, TOOLS, LEGAL_LINKS } from '../config/site';
+
+const year = new Date().getFullYear();
+const socials = [
+  { key: 'instagram', label: 'Instagram', href: SOCIAL.instagram },
+  { key: 'youtube', label: 'YouTube', href: SOCIAL.youtube },
+  { key: 'facebook', label: 'Facebook', href: SOCIAL.facebook },
+  { key: 'twitter', label: 'X (Twitter)', href: SOCIAL.x },
+  { key: 'linkedin', label: 'LinkedIn', href: SOCIAL.linkedin },
+] as const;
+const activeSocials = socials.filter((s) => s.href);
+
+const company = [
+  { label: 'About', href: '/about' },
+  { label: 'Coaches', href: '/coaches' },
+  { label: 'Transformations', href: '/transformations' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'FAQ', href: '/faq' },
+  { label: 'Contact', href: '/contact' },
+];
+---
+<footer class="relative overflow-hidden border-t border-line bg-night text-ink">
+  <!-- CTA strip -->
+  <div class="relative z-10 container-pf flex flex-col items-start justify-between gap-6 border-b border-line py-12 md:flex-row md:items-center">
+    <div>
+      <p class="eyebrow mb-2">Start with a free call</p>
+      <p class="font-display text-2xl font-bold md:text-3xl">Your plan, built around your life.</p>
+    </div>
+    <a href="/contact" data-open-inquiry class="btn-primary">Get Started <Icon name="arrow-right" size={16} /></a>
+  </div>
+
+  <div class="relative z-10 container-pf grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-12">
+    <div class="lg:col-span-4">
+      <Logo />
+      <p class="mt-4 max-w-sm text-sm leading-relaxed text-muted">{SITE.description}</p>
+      <ul class="mt-6 space-y-2 text-sm">
+        <li>
+          <a href={`mailto:${CONTACT.email}`} class="inline-flex items-center gap-2 text-ink/80 hover:text-primary">
+            <Icon name="mail" size={16} /> {CONTACT.email}
+          </a>
+        </li>
+        <li>
+          <a href={`https://wa.me/${CONTACT.whatsapp}`} rel="noopener" target="_blank" class="inline-flex items-center gap-2 text-ink/80 hover:text-primary">
+            <Icon name="message-circle" size={16} /> WhatsApp {CONTACT.phoneDisplay}
+          </a>
+        </li>
+      </ul>
+      {activeSocials.length > 0 && (
+        <ul class="mt-6 flex gap-2" aria-label="Social media">
+          {activeSocials.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener" class="grid h-10 w-10 place-items-center rounded-pill border border-line text-ink/70 transition-colors hover:border-primary hover:text-primary" aria-label={s.label}>
+                <Icon name={s.key} size={18} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+    <nav aria-label="Services" class="lg:col-span-3">
+      <h2 class="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-muted">Services</h2>
+      <ul class="space-y-2.5 text-sm">
+        {SERVICES.map((s) => (
+          <li>
+            <a href={`/services/${s.slug}`} class="group inline-flex items-center gap-2 text-ink/80 hover:text-primary">
+              <Icon name={s.icon} size={15} class="text-primary/80" />{s.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <nav aria-label="Company" class="lg:col-span-2">
+      <h2 class="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-muted">Company</h2>
+      <ul class="space-y-2.5 text-sm">
+        {company.map((l) => <li><a href={l.href} class="text-ink/80 hover:text-primary">{l.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <nav aria-label="Free tools" class="lg:col-span-3">
+      <h2 class="mb-4 font-display text-sm font-semibold uppercase tracking-widest text-muted">Free tools</h2>
+      <ul class="space-y-2.5 text-sm">
+        {TOOLS.map((t) => <li><a href={`/tools/${t.slug}`} class="text-ink/80 hover:text-primary">{t.name}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+
+  <div class="relative z-10 border-t border-line">
+    <div class="relative z-10 container-pf py-6">
+      <p class="text-xs leading-relaxed text-muted">
+        <strong class="text-ink/80">Disclaimer:</strong> Content on {SITE.name} is for general information and education only and is not medical advice.
+        Consult a qualified doctor before starting any exercise or nutrition program, especially if you have a medical condition, are pregnant, or take medication.{" "}
+        <a href="/disclaimer" class="underline underline-offset-2 hover:text-primary">Read the full disclaimer</a>.
+      </p>
+      <div class="mt-5 flex flex-col gap-4 text-xs text-muted md:flex-row md:items-center md:justify-between">
+        <p>© {year} {SITE.name}. All rights reserved.</p>
+        <ul class="flex flex-wrap gap-x-5 gap-y-2">
+          {LEGAL_LINKS.map((l) => <li><a href={l.href} class="hover:text-primary">{l.label}</a></li>)}
+          <li><button type="button" data-cookie-settings class="hover:text-primary">Cookie settings</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Giant watermark in its own band below the legal row (never behind text) -->
+  <div class="relative overflow-hidden" aria-hidden="true">
+    <svg class="block w-full" viewBox="0 0 1000 135" preserveAspectRatio="xMidYMin slice" role="presentation" focusable="false">
+      <text x="500" y="160" text-anchor="middle" font-family="Space Grotesk Variable, Space Grotesk, sans-serif" font-weight="700" font-size="200" letter-spacing="-10" fill="#17191E">PeriodicFit</text>
+    </svg>
+  </div>
+</footer>

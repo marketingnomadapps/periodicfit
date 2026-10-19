@@ -1,0 +1,41 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { PROGRAMS } from '../../data/home';
+---
+<section id="programs" data-section-bg="#121418" class="programs relative overflow-hidden py-24 [.js-motion_&]:py-0">
+  <div class="prog-pin [.js-motion_&]:flex [.js-motion_&]:min-h-[100svh] [.js-motion_&]:flex-col [.js-motion_&]:justify-center [.js-motion_&]:py-20">
+    <div class="container-pf mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div>
+        <p class="eyebrow mb-4">(Programs)</p>
+        <h2 class="split-heading text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[0.95] tracking-[-0.03em]">Periodized,<br />phase by phase.</h2>
+      </div>
+      <p class="max-w-sm text-muted">Every program runs in planned phases, so you keep progressing instead of hitting a wall at week four.</p>
+    </div>
+
+    <div class="prog-viewport overflow-x-auto pb-4 [scrollbar-width:none] [.js-motion_&]:overflow-visible [.js-motion_&]:pb-0">
+      <ul class="prog-track flex w-max snap-x snap-mandatory [.js-motion_&]:snap-none gap-4 px-4 sm:px-6 md:gap-6 lg:px-[max(2rem,calc((100vw-80rem)/2+2rem))]">
+        {PROGRAMS.map((p, i) => (
+          <li class="prog-card w-[74vw] shrink-0 snap-start sm:w-[46vw] md:w-[34vw] lg:w-[28vw]">
+            <a href={p.href} class="group block">
+              <div class="relative aspect-[4/5] overflow-hidden rounded-card">
+                <Image src={p.img} alt={p.alt} widths={[500, 800]} sizes="(min-width: 1024px) 28vw, (min-width: 768px) 34vw, 78vw" class="prog-photo absolute inset-0 h-full w-[120%] max-w-none object-cover transition-[filter] duration-700 group-hover:brightness-110" />
+                <div class="absolute inset-0 bg-gradient-to-t from-night/90 via-night/10 to-transparent"></div>
+                <span class="absolute left-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-primary text-night"><Icon name={p.icon} size={20} /></span>
+                <span class="absolute right-4 top-4 rounded-pill bg-night/75 px-3 py-1 text-xs text-ink/90">{p.weeks}</span>
+                <div class="absolute inset-x-0 bottom-0 p-5">
+                  <p class="text-xs uppercase tracking-[0.15em] text-primary">{p.phases}</p>
+                  <h3 class="mt-2 text-2xl font-bold">{p.title}</h3>
+                  <p class="mt-2 text-sm text-ink/75">{p.text}</p>
+                </div>
+              </div>
+              <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-ink group-hover:text-primary">
+                <span class="font-display text-muted">{String(i + 1).padStart(2, '0')}</span> View program <Icon name="arrow-right" size={14} />
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,194 @@
+---
+import { Image } from 'astro:assets';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Icon from '../components/Icon.astro';
+import Ribbons from '../components/fx/Ribbons.astro';
+import { SITE } from '../config/site';
+// Temporary photos (Unsplash). TODO: replace with real team / client photos.
+import athletes from '../assets/images/about/athletes.jpg';
+import group from '../assets/images/about/group.jpg';
+import bands from '../assets/images/about/bands.jpg';
+import gymMan from '../assets/images/about/gym-man.jpg';
+import cooking from '../assets/images/about/cooking.jpg';
+import team from '../assets/images/about/team.jpg';
+import rack from '../assets/images/about/rack.jpg';
+import darkGym from '../assets/images/about/dark-gym.jpg';
+import { IMG } from '../data/images';
+import { TOOL_IMG } from '../data/toolMedia';
+
+const cols = [
+  { speed: 1.2, imgs: [athletes, TOOL_IMG.curry, bands] },
+  { speed: -1, imgs: [rack, cooking, TOOL_IMG.yoga] },
+  { speed: 1.6, imgs: [group, TOOL_IMG.eggs, gymMan] },
+];
+const values = [
+  { e: '🧠', icon: 'flask-conical', t: 'Science, not trends', d: 'Every plan is based on established research on training, nutrition and behaviour change. No detoxes, no magic pills.' },
+  { e: '🍛', icon: 'utensils', t: 'Your food, your culture', d: 'Dal, roti, idli or pasta. We plan around what you already eat instead of asking you to give it up.' },
+  { e: '🤝', icon: 'users', t: 'Real coaches', d: 'A qualified human reviews your progress every week. Software helps, people coach.' },
+  { e: '🐢', icon: 'trending-up', t: 'Slow is sustainable', d: 'We aim for changes you can keep for years, not results that disappear after the wedding.' },
+];
+const pillars = [
+  { e: '🏋️', t: 'Training', d: 'Periodized programs for your goal, schedule and equipment. Progress is planned in blocks, reviewed weekly and adjusted when life happens.', img: IMG.program5, alt: 'Lifter gripping a barbell', href: '/services/online-personal-training' },
+  { e: '🥗', t: 'Nutrition', d: 'Meal plans and dietitian consults built on your plate, your budget and your health. Protein first, nothing banned.', img: TOOL_IMG.salmonBowl, alt: 'Salmon and vegetable bowl', href: '/services/diet-plans' },
+  { e: '🧘', t: 'Recovery', d: 'Sleep, stress, mobility and rest days. The part most plans forget, and the reason most plans stop working.', img: TOOL_IMG.yoga, alt: 'Yoga pose in black and white', href: '/services/yoga-mobility' },
+];
+// TODO: real coach names, photos and certifications (also used on /coaches)
+const coaches = [
+  { role: 'Head Strength Coach', focus: 'Strength · Hypertrophy · Form', img: gymMan },
+  { role: 'Lead Dietitian', focus: 'Clinical nutrition · PCOS · Diabetes', img: team },
+  { role: 'Yoga & Mobility Coach', focus: 'Mobility · Posture · Recovery', img: bands },
+];
+const facts = [
+  { e: '📱', t: '100% online coaching' }, { e: '🧠', t: 'Science-backed plans' }, { e: '🍛', t: 'Culture-friendly food' },
+  { e: '🤝', t: 'Real human coaches' }, { e: '🚫', t: 'No crash diets, ever' },
+];
+const orgLd = { '@context': 'https://schema.org', '@type': 'AboutPage', name: `About ${SITE.name}`, url: `${SITE.url}/about`, about: { '@type': 'Organization', name: SITE.name, url: SITE.url } };
+---
+<MarketingLayout title="About Us" description="PeriodicFit is an online coaching team for training, nutrition and recovery. Science-backed, culture-friendly plans built around real life.">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(orgLd)} />
+
+  <!-- Hero: copy + moving photo columns -->
+  <section class="relative overflow-hidden pt-28 md:pt-32">
+    <div class="pointer-events-none absolute -left-40 top-0 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.14),transparent_65%)]" aria-hidden="true"></div>
+    <div class="container-pf grid items-center gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-6">
+        <nav aria-label="Breadcrumb" class="mb-6 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">About</li></ol></nav>
+        <p class="mb-5 inline-flex items-center gap-2 rounded-pill border border-white/15 bg-white/5 px-3.5 py-1.5 text-sm">👋 Hi, we're PeriodicFit</p>
+        <h1 data-fx="words" class="font-display text-[clamp(2.7rem,6.5vw,6rem)] font-bold leading-[0.93] tracking-[-0.04em]">We coach people, <span class="text-primary">not programs.</span></h1>
+        <p class="mt-6 max-w-lg text-lg text-ink/75">PeriodicFit is an online team of coaches and dietitians. We build training and nutrition in phases around your real life, then adjust it every week until it works.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/contact" data-open-inquiry data-fx="magnetic" class="btn-primary">Book Free Consultation <Icon name="arrow-right" size={16} /></a>
+          <a href="#story" class="btn-secondary">Our story</a>
+        </div>
+      </div>
+      <div class="relative h-[460px] overflow-hidden rounded-[32px] md:h-[620px] lg:col-span-6" data-fx="columns" aria-hidden="true">
+        <div class="grid h-full grid-cols-3 gap-3">
+          {cols.map((c) => (
+            <div data-fx-col={c.speed} class="flex flex-col gap-3" style={c.speed < 0 ? 'margin-top:-40%' : 'margin-top:-12%'}>
+              {[...c.imgs, ...c.imgs].map((img) => (
+                <div class="aspect-[3/4] shrink-0 overflow-hidden rounded-[20px]"><Image src={img} alt="" widths={[260, 400]} sizes="(min-width: 1024px) 15vw, 30vw" quality={62} class="h-full w-full object-cover" /></div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-night to-transparent"></div>
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-night to-transparent"></div>
+        <span class="chip-glass absolute left-4 top-6 z-10">🔥 Real coaching</span>
+        <span class="chip-glass absolute bottom-8 right-4 z-10">🍛 Real food</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section id="story" class="relative py-24 md:py-36">
+    <div class="container-pf grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="aspect-[4/5] overflow-hidden rounded-[28px] lg:col-span-5" data-fx="clip">
+        <Image src={darkGym} alt="Dark gym floor with training equipment" widths={[500, 900]} sizes="(min-width: 1024px) 40vw, 100vw" quality={66} class="h-full w-full object-cover" />
+      </div>
+      <div class="lg:col-span-7">
+        <p class="eyebrow mb-4">(Our story)</p>
+        <h2 data-fx="words" class="font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Most plans fail. Not because people are lazy.</h2>
+        <div class="mt-8 space-y-5 text-lg leading-relaxed text-ink/80">
+          <p>They fail because they're built for a perfect week that never comes. Copy-paste workouts. Diets that ban the food your family eats. No one checking in when life gets busy.</p>
+          <p>PeriodicFit started with a simple idea borrowed from sport science: <strong class="text-ink">periodization</strong>. Plan in phases. Review often. Adjust before you stall. Then pair it with food you actually enjoy and a coach who knows your name.</p>
+          <p class="text-ink">That's the whole method. It's not flashy. It works. {/* TODO: add founder story / founding year once confirmed */}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Ribbons items={facts} />
+
+  <!-- Values -->
+  <section class="relative py-24 md:py-32">
+    <div class="container-pf">
+      <div class="mb-14 max-w-3xl">
+        <p class="eyebrow mb-4">(What we believe)</p>
+        <h2 data-fx="words" class="font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Four rules we coach by.</h2>
+      </div>
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-fx="rise">
+        {values.map((v, i) => (
+          <li data-fx-item>
+            <div data-fx="tilt" class="group relative h-full overflow-hidden rounded-[26px] border border-line bg-surface p-7 transition-colors hover:border-primary/60">
+              <span class="pointer-events-none absolute -right-4 -top-6 font-display text-[7rem] font-bold leading-none text-white/[0.04]">0{i + 1}</span>
+              <span class="block text-5xl transition-transform duration-500 ease-out-expo group-hover:-rotate-12 group-hover:scale-110">{v.e}</span>
+              <h3 class="mt-8 font-display text-2xl font-bold">{v.t}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-muted">{v.d}</p>
+              <span class="mt-6 inline-grid h-10 w-10 place-items-center rounded-full bg-surface-2 text-primary"><Icon name={v.icon} size={18} /></span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Pillars: alternating rows with clip-reveal photos -->
+  <section class="relative bg-surface/40 py-24 md:py-36">
+    <div class="container-pf">
+      <div class="mb-16 text-center">
+        <p class="eyebrow mb-4">(The method)</p>
+        <h2 data-fx="words" class="mx-auto max-w-3xl font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Three pillars. One plan.</h2>
+      </div>
+      <div class="space-y-20 md:space-y-28">
+        {pillars.map((p, i) => (
+          <div class="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+            <div class:list={['aspect-[5/4] overflow-hidden rounded-[28px]', i % 2 === 1 && 'md:order-2']} data-fx="clip">
+              <Image src={p.img} alt={p.alt} widths={[500, 900]} sizes="(min-width: 768px) 45vw, 100vw" quality={66} class="h-full w-full object-cover" />
+            </div>
+            <div>
+              <span class="text-6xl">{p.e}</span>
+              <p class="mt-6 font-display text-sm text-primary">0{i + 1} / 03</p>
+              <h3 class="mt-2 font-display text-4xl font-bold tracking-tight md:text-5xl">{p.t}</h3>
+              <p class="mt-4 max-w-md text-lg text-ink/75">{p.d}</p>
+              <a href={p.href} class="mt-6 inline-flex items-center gap-2 font-semibold text-primary hover:underline">Explore {p.t.toLowerCase()} <Icon name="arrow-right" size={16} /></a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Team teaser -->
+  <section class="relative py-24 md:py-32">
+    <div class="container-pf">
+      <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <div>
+          <p class="eyebrow mb-4">(The team)</p>
+          <h2 data-fx="words" class="font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Qualified people. Real conversations.</h2>
+        </div>
+        <a href="/coaches" class="btn-secondary self-start md:self-auto">Meet the coaches <Icon name="arrow-right" size={16} /></a>
+      </div>
+      <ul class="grid gap-4 md:grid-cols-3" data-fx="rise">
+        {coaches.map((c) => (
+          <li data-fx-item>
+            <div data-fx="tilt" class="group relative aspect-[4/5] overflow-hidden rounded-[28px] border border-line">
+              <Image src={c.img} alt="" widths={[400, 700]} sizes="(min-width: 768px) 33vw, 100vw" quality={65} class="absolute inset-0 h-full w-full object-cover grayscale transition-[filter,transform] duration-700 ease-out-expo group-hover:scale-105 group-hover:grayscale-0" />
+              <div class="absolute inset-0 bg-gradient-to-t from-night via-night/30 to-transparent"></div>
+              <div class="absolute inset-x-0 bottom-0 p-6">
+                <p class="font-display text-2xl font-bold">{c.role}</p>
+                <p class="mt-1 text-sm text-primary">{c.focus}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="relative overflow-hidden py-24 md:py-32">
+    <div class="pointer-events-none absolute inset-0" data-fx="stickers" aria-hidden="true">
+      {[['💪', 'left-[4%] top-[6%] text-4xl md:left-[8%] md:top-[20%] md:text-5xl', 1.2], ['🥗', 'right-[4%] top-[4%] text-4xl md:right-[10%] md:top-[16%] md:text-5xl', 0.9], ['🔥', 'left-[6%] bottom-[3%] text-3xl md:left-[18%] md:bottom-[14%] md:text-4xl', 1.5], ['🏆', 'right-[6%] bottom-[3%] text-4xl md:right-[18%] md:bottom-[18%] md:text-5xl', 1.1]].map(([e, cls, d]) => <span data-fx-item data-depth={d} class:list={['absolute', cls]}>{e}</span>)}
+    </div>
+    <div class="container-pf relative text-center">
+      <h2 data-fx="words" class="mx-auto max-w-4xl font-display text-[clamp(2.4rem,6vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.03em]">Your first phase starts <span class="text-primary">with a free call.</span></h2>
+      <p class="mx-auto mt-6 max-w-lg text-lg text-ink/75">Tell us your goal. A coach replies within 24 hours.</p>
+      <a href="/contact" data-open-inquiry data-fx="magnetic" class="btn-primary mt-9 px-8 py-4 text-base">Book Free Consultation <Icon name="arrow-right" size={18} /></a>
+    </div>
+  </section>
+</MarketingLayout>
+
+<script>
+  import { initFx } from '../scripts/fx';
+  initFx();
+</script>

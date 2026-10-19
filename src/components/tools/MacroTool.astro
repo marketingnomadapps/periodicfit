@@ -1,0 +1,72 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+import ActivitySelect from './ActivitySelect.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs />
+    <ActivitySelect />
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <label class="t-field"><span class="t-label">Goal</span>
+        <select name="goal" class="t-select"><option value="lose">Lose fat</option><option value="maintain" selected>Maintain</option><option value="gain">Build muscle</option></select>
+      </label>
+      <label class="t-field"><span class="t-label">Diet style</span>
+        <select name="style" class="t-select"><option value="balanced" selected>Balanced</option><option value="lowcarb">Lower carb</option><option value="highcarb">Higher carb (athletes)</option></select>
+      </label>
+    </div>
+  </Fragment>
+  <Fragment slot="result">
+    <div class="flex items-center gap-6">
+      <div class="relative h-36 w-36 shrink-0 md:h-40 md:w-40">
+        <div class="h-full w-full rounded-full transition-[background] duration-700" data-out="donut" style="background: conic-gradient(#C6FF3D 0 30%, #FF6B2C 30% 75%, #7DD3FC 75% 100%)"></div>
+        <div class="absolute inset-[18%] grid place-items-center rounded-full bg-surface text-center">
+          <div><span class="t-result-num block text-2xl md:text-3xl" data-out="kcal">0</span><span class="text-[0.65rem] text-muted">kcal/day</span></div>
+        </div>
+      </div>
+      <dl class="grid flex-1 gap-2">
+        <div class="flex items-center justify-between rounded-xl bg-night/50 px-3 py-2"><dt class="flex items-center gap-2 text-sm"><span class="h-2.5 w-2.5 rounded-full bg-primary"></span>Protein</dt><dd class="font-display font-bold tabular-nums"><span data-out="p">0</span> g</dd></div>
+        <div class="flex items-center justify-between rounded-xl bg-night/50 px-3 py-2"><dt class="flex items-center gap-2 text-sm"><span class="h-2.5 w-2.5 rounded-full bg-accent"></span>Carbs</dt><dd class="font-display font-bold tabular-nums"><span data-out="c">0</span> g</dd></div>
+        <div class="flex items-center justify-between rounded-xl bg-night/50 px-3 py-2"><dt class="flex items-center gap-2 text-sm"><span class="h-2.5 w-2.5 rounded-full bg-sky-300"></span>Fats</dt><dd class="font-display font-bold tabular-nums"><span data-out="f">0</span> g</dd></div>
+      </dl>
+    </div>
+    <p class="mt-6 text-sm text-ink/70">Per meal (4 meals/day)</p>
+    <p class="mt-1 font-display text-lg font-bold" data-out="meal">–</p>
+    <p class="mt-4 text-xs text-muted">Protein is set per kg of body weight, fats as a share of calories, carbs fill the rest.</p>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bmr, ACTIVITY, bodyMetrics, num, str, wireTool, emitResult, shareUrl, countTo, fmt, round, type Sex } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="macro-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    wireTool(form, () => {
+      const { cm, kg } = bodyMetrics(form);
+      const age = num(form, 'age'); const sex = (str(form, 'sex') || 'male') as Sex;
+      if (!(cm > 100 && kg > 25 && age >= 15)) return;
+      const tdee = bmr(sex, kg, cm, age) * (ACTIVITY[str(form, 'activity')]?.f ?? 1.55);
+      const goal = str(form, 'goal');
+      const kcal = round(tdee * (goal === 'lose' ? 0.8 : goal === 'gain' ? 1.1 : 1), -1);
+      const pPerKg = goal === 'lose' ? 2.0 : goal === 'gain' ? 1.8 : 1.6;
+      const fatShare = { balanced: 0.3, lowcarb: 0.4, highcarb: 0.2 }[str(form, 'style')] ?? 0.3;
+      const p = round(kg * pPerKg);
+      const f = round(Math.max((kcal * fatShare) / 9, kg * 0.6));
+      const c = Math.max(0, round((kcal - p * 4 - f * 9) / 4));
+      const pp = (p * 4) / kcal * 100, fp = (f * 9) / kcal * 100;
+      root.querySelector<HTMLElement>('[data-out="donut"]')!.style.background = `conic-gradient(#C6FF3D 0 ${pp}%, #FF6B2C ${pp}% ${100 - fp}%, #7DD3FC ${100 - fp}% 100%)`;
+      countTo(root.querySelector('[data-out="kcal"]'), kcal);
+      countTo(root.querySelector('[data-out="p"]'), p);
+      countTo(root.querySelector('[data-out="c"]'), c);
+      countTo(root.querySelector('[data-out="f"]'), f);
+      root.querySelector('[data-out="meal"]')!.textContent = `${round(p / 4)} g protein · ${round(c / 4)} g carbs · ${round(f / 4)} g fats`;
+      const goalLabel = goal === 'lose' ? 'fat loss' : goal === 'gain' ? 'muscle gain' : 'maintenance';
+      emitResult(form, {
+        tool: 'Macro Calculator', kicker: `My macros for ${goalLabel}`, hero: fmt(kcal), heroUnit: 'kcal / day',
+        stats: [{ label: 'Protein', value: `${p} g` }, { label: 'Carbs', value: `${c} g` }, { label: 'Fats', value: `${f} g` }],
+        shareText: `My ${goalLabel} macros: ${p}g protein, ${c}g carbs, ${f}g fats. Get yours free:`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

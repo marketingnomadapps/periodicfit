@@ -1,0 +1,33 @@
+---
+// TODO: legal review before launch.
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { SITE } from '../config/site';
+---
+<LegalLayout title="Cookie Policy" label="Cookies" description={`Which cookies ${SITE.domain} uses and how to control them.`} intro="No tracking happens until you say yes. Here's exactly what we use.">
+  <h2>What cookies are</h2>
+  <p>Cookies are small files a website stores on your device. Similar technologies, such as local storage, work the same way. We call them all "cookies" here.</p>
+
+  <h2>Our approach</h2>
+  <p>When you first visit, we ask for your choice. <strong>Until you accept, we only use what is strictly necessary</strong> to run the website and remember your choice.</p>
+
+  <h2>Cookies we use</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Purpose</th><th>Provider</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td>Strictly necessary</td><td>Remember your cookie choice; stop the consultation popup appearing twice in one visit; security and spam protection</td><td>{SITE.name}, Cloudflare</td><td>Always</td></tr>
+        <tr><td>Analytics</td><td>Count visits and see which pages are useful (e.g. <code>_ga</code>, <code>_ga_*</code>)</td><td>Google Analytics</td><td>Only if you accept</td></tr>
+        <tr><td>Advertising</td><td>Show and measure ads that keep our tools free</td><td>Google AdSense</td><td>Only if you accept, and only once ads are switched on</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Changing your choice</h2>
+  <p>Use the <button type="button" data-cookie-settings class="font-semibold text-primary underline underline-offset-4">Cookie settings</button> link at any time (it's also in the footer). You can also block or delete cookies in your browser settings. Blocking necessary cookies may affect how the site works.</p>
+
+  <h2>Third-party cookies</h2>
+  <p>Google sets its own cookies for analytics and ads. Learn <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener noreferrer">how Google uses cookies</a>. You can also manage personalised ads in your <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">Google ad settings</a>.</p>
+
+  <h2>More information</h2>
+  <p>See our <a href="/privacy-policy">Privacy Policy</a> for how we handle personal data.</p>
+</LegalLayout>

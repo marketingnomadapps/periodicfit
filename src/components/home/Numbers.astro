@@ -1,0 +1,30 @@
+---
+import { NUMBERS } from '../../data/home';
+---
+<!--
+  Self-contained lime section: the lime panel grows from a rounded card to full width on scroll.
+  Text inside is always dark, text outside always light, so nothing ever becomes unreadable.
+-->
+<section id="numbers" class="numbers relative py-6 text-night md:py-10">
+  <div class="num-panel absolute inset-x-0 inset-y-0 origin-center rounded-[28px] bg-primary will-change-transform" aria-hidden="true"></div>
+  <div class="container-pf relative py-20 md:py-32">
+    <div class="mb-14 grid gap-6 md:mb-20 md:grid-cols-2 md:items-end">
+      <div>
+        <p class="mb-4 font-display text-xs font-semibold uppercase tracking-[0.2em] text-night/70">(By the numbers)</p>
+        <h2 class="split-heading text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[0.95] tracking-[-0.03em]">Real people.<br />Real progress.</h2>
+      </div>
+      <p class="max-w-sm text-night/75 md:justify-self-end">No 7-day miracles. Just consistent coaching, honest check-ins and plans that people actually stay on.</p>
+    </div>
+    <!-- TODO: every number below is a placeholder — replace in src/data/home.ts -->
+    <dl class="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-4 md:gap-x-6">
+      {NUMBERS.map((n) => (
+        <div class="num-item flex flex-col border-l-2 border-night/20 pl-4 md:pl-5">
+          <dt class="order-2 mt-3 text-sm font-medium text-night/75 md:text-base">{n.label}</dt>
+          <dd class="order-1 font-display text-[clamp(2.75rem,5.2vw,5rem)] font-bold leading-none tracking-[-0.04em] tabular-nums">
+            <span class="counter" data-target={n.value}>{n.value.toLocaleString('en-US')}</span>{n.suffix}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>

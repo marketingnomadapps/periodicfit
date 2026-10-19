@@ -1,0 +1,13 @@
+---
+/** Dark, premium, full parallax experience (home, services, pricing...). */
+import BaseLayout from './BaseLayout.astro';
+import type { SEOProps } from '../components/SEO.astro';
+
+interface Props extends SEOProps { transparentHeader?: boolean; service?: string; autoInquiry?: boolean }
+const { transparentHeader = true, service, autoInquiry = false, ...seo } = Astro.props;
+---
+<BaseLayout {...seo} theme="dark" motion="full" transparentHeader={transparentHeader} service={service} autoInquiry={autoInquiry}>
+  <slot name="head" slot="head" />
+  <slot />
+  <slot name="body-end" slot="body-end" />
+</BaseLayout>

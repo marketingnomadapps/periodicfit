@@ -1,0 +1,41 @@
+---
+/** /blog/category/<slug> and /blog/category/<slug>/<page> */
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import BlogListing from '../../../components/blog/BlogListing.astro';
+import { getPosts, getCategories } from '../../../lib/posts';
+import { BLOG, SITE } from '../../../config/site';
+
+export async function getStaticPaths() {
+  const all = await getPosts();
+  const cats = await getCategories();
+  return cats.flatMap((c) => {
+    const posts = all.filter((p) => p.categories.some((x) => x.slug === c.slug));
+    const last = Math.max(1, Math.ceil(posts.length / BLOG.perPage));
+    return Array.from({ length: last }, (_, i) => ({
+      params: { slug: i === 0 ? c.slug : `${c.slug}/${i + 1}` },
+      props: { cat: c, posts: posts.slice(i * BLOG.perPage, (i + 1) * BLOG.perPage), current: i + 1, last },
+    }));
+  });
+}
+const { cat, posts, current, last } = Astro.props;
+const all = await getPosts();
+const categories = await getCategories();
+const INTRO: Record<string, string> = {
+  workouts: 'Programs, exercise technique and training principles that actually work.',
+  nutrition: 'Protein, macros, micronutrients and everyday eating, explained simply.',
+  'diet-plans': 'Realistic meal plans and prep ideas for every diet and budget.',
+  'weight-loss': 'Sustainable fat loss without crash diets or punishment.',
+  'muscle-building': 'Hypertrophy training and nutrition for lean muscle gain.',
+  'healthy-recipes': 'High-protein, home-style recipes that fit your goals.',
+  supplements: 'What works, what doesn’t, and what you can skip.',
+  'lifestyle-recovery': 'Sleep, stress, mobility and recovery: the other half of progress.',
+};
+const ld = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${cat.name} articles`, url: `${SITE.url}/blog/category/${cat.slug}` };
+---
+<BlogLayout title={`${cat.name} Articles${current > 1 ? ` (page ${current})` : ''}`} description={INTRO[cat.slug] ?? `${cat.name} articles from PeriodicFit.`} noindex={posts.length === 0}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <BlogListing posts={posts} all={all} categories={categories} activeCategory={cat.slug}
+    eyebrow="Category" heading={cat.name} intro={INTRO[cat.slug] ?? `Articles about ${cat.name.toLowerCase()}.`}
+    page={{ current, last, base: `/blog/category/${cat.slug}` }}
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog' }, { label: cat.name }]} />
+</BlogLayout>

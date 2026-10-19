@@ -1,0 +1,46 @@
+---
+import { SITE, ANALYTICS } from '../config/site';
+
+export interface SEOProps {
+  title: string;
+  description?: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  canonical?: string;
+}
+const {
+  title,
+  description = SITE.description,
+  image = SITE.defaultOgImage,
+  imageAlt = SITE.name,
+  type = 'website',
+  noindex = false,
+  canonical,
+} = Astro.props as SEOProps;
+
+const fullTitle = title === SITE.name ? `${SITE.name} | Online Personal Training & Diet Plans` : `${title} | ${SITE.name}`;
+const canonicalURL = canonical ?? new URL(Astro.url.pathname.replace(/\/$/, '') || '/', SITE.url).href;
+const ogImage = new URL(image, SITE.url).href;
+---
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta property="og:locale" content="en_US" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{ANALYTICS.gscVerification && <meta name="google-site-verification" content={ANALYTICS.gscVerification} />}

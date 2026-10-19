@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import { IMG } from '../../data/images';
+import { STATEMENT } from '../../data/home';
+
+// *phrase* in the copy = highlighted in lime as it is read.
+const plain = STATEMENT.replace(/\*/g, '');
+const tokens: { w: string; hl: boolean }[] = [];
+let hl = false;
+for (const raw of STATEMENT.split(' ')) {
+  const starts = raw.startsWith('*');
+  const ends = raw.replace(/[.,]$/, '').endsWith('*');
+  if (starts) hl = true;
+  tokens.push({ w: raw.replace(/\*/g, ''), hl });
+  if (ends) hl = false;
+}
+---
+<section id="statement" data-section-bg="#0E0F12" class="statement relative">
+  <div class="st-pin flex min-h-[100svh] items-center py-24">
+    <div class="container-pf grid w-full gap-10 md:grid-cols-12 md:gap-8">
+      <div class="flex items-center gap-4 md:col-span-3 md:block">
+        <p class="eyebrow">(Why PeriodicFit)</p>
+        <div class="statement-media mt-0 aspect-square w-16 shrink-0 overflow-hidden rounded-xl md:mt-8 md:aspect-[3/4] md:w-full md:rounded-card" data-img-parallax>
+          <Image src={IMG.statement} alt="Athlete's back during a pull-up, black and white" widths={[160, 500]} sizes="(min-width: 768px) 25vw, 64px" quality={70} class="h-[120%] w-full object-cover" />
+        </div>
+        <div class="st-progress mt-8 hidden h-0.5 w-full overflow-hidden rounded bg-line md:block" aria-hidden="true">
+          <div class="st-progress-bar h-full origin-left scale-x-0 bg-primary"></div>
+        </div>
+      </div>
+      <div class="md:col-span-9">
+        <p class="sr-only">{plain}</p>
+        <p class="statement-text font-display text-[clamp(1.55rem,3.6vw,3.25rem)] font-semibold leading-[1.18] tracking-[-0.02em]" aria-hidden="true">
+          {tokens.map((t) => <span class:list={['st-word', t.hl && 'st-hl']}>{t.w} </span>)}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .st-word { display: inline; transition: none; }
+  :global(.js-motion) .st-word { opacity: 0.4; } /* 0.4 keeps 3:1 contrast for large text */
+  .st-hl { color: var(--color-primary); }
+</style>

@@ -1,0 +1,67 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import type { Service } from '../../config/site';
+import type { ServiceContent } from '../../data/services';
+
+interface Props { service: Service; content: ServiceContent; image: { src: ImageMetadata; alt: string } }
+const { service, content, image } = Astro.props;
+---
+<section id="svc-hero" class="svc-hero relative bg-night">
+  <div class="sh-pin relative min-h-[100svh] overflow-hidden lg:h-[100svh]">
+    <!-- Full-bleed media: JS clips it to the frame, then opens it to full screen on scroll -->
+    <div class="sh-media pointer-events-none absolute inset-0 hidden" aria-hidden="true">
+      <Image src={image.src} alt="" widths={[800, 1400, 1920]} sizes="100vw" quality={68} loading="lazy" class="sh-media-img h-full w-full object-cover" />
+      <div class="sh-media-shade absolute inset-0 bg-night/0"></div>
+    </div>
+
+    <div class="container-pf relative grid min-h-[100svh] items-center gap-8 pb-10 pt-24 lg:h-full lg:min-h-0 lg:grid-cols-12 lg:gap-12 lg:pb-0 lg:pt-20">
+      <div class="sh-copy lg:col-span-6">
+        <nav aria-label="Breadcrumb" class="sh-crumbs mb-6 text-xs text-muted">
+          <ol class="flex flex-wrap items-center gap-1.5">
+            <li><a href="/" class="hover:text-primary">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href="/services" class="hover:text-primary">Services</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-ink/80">{service.short}</li>
+          </ol>
+        </nav>
+        <p class="sh-chip mb-6 inline-flex items-center gap-2 rounded-pill border border-white/15 bg-white/5 px-3.5 py-1.5 text-sm text-ink">
+          <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-night"><Icon name={service.icon} size={13} strokeWidth={2.4} /></span>
+          {content.eyebrow}
+        </p>
+        <h1 class="sh-title font-display text-[clamp(2.6rem,6.4vw,6rem)] font-bold leading-[0.95] tracking-[-0.03em] [perspective:800px]">
+          <span class="block">{content.headline[0]}</span>
+          <span class="block text-primary">{content.headline[1]}</span>
+        </h1>
+        <p class="sh-promise mt-6 max-w-lg text-base text-ink/75 md:text-lg">{content.promise}</p>
+        <div class="sh-ctas mt-8 flex flex-wrap gap-3">
+          <a href="#contact" data-open-inquiry data-service={service.slug} class="btn-primary">Book Free Consultation <Icon name="arrow-right" size={16} /></a>
+          <a href="#features" class="btn-secondary">See what you get</a>
+        </div>
+        <ul class="sh-trust mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
+          <li class="flex items-center gap-2"><Icon name="circle-check" size={16} class="text-primary" /> Free first call</li>
+          <li class="flex items-center gap-2"><Icon name="clock" size={16} class="text-primary" /> Reply within 24 h</li>
+          <li class="flex items-center gap-2"><Icon name="shield-check" size={16} class="text-primary" /> Qualified coaches</li>
+        </ul>
+      </div>
+
+      <div class="lg:col-span-6 lg:justify-self-end">
+        <div class="sh-frame relative aspect-[4/3] w-full overflow-hidden rounded-[32px] lg:aspect-[4/5] lg:h-[70vh] lg:w-auto">
+          <Image src={image.src} alt={image.alt} widths={[600, 900, 1200]} sizes="(min-width: 1024px) 45vw, 100vw" quality={70} loading="eager" fetchpriority="high" class="sh-frame-img h-full w-full object-cover" />
+          <div class="sh-curtain absolute inset-0 origin-right bg-primary" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statement revealed when the image fills the screen -->
+    <div class="sh-statement pointer-events-none absolute inset-0 hidden items-center justify-center px-6 text-center" aria-hidden="true">
+      <p class="max-w-5xl font-display text-[clamp(2.4rem,7vw,6.5rem)] font-bold leading-[0.95] tracking-[-0.03em] [perspective:800px]">{content.bigStatement}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Without motion the curtain is never drawn */
+  :global(html:not(.js-motion)) .sh-curtain { display: none; }
+</style>

@@ -1,0 +1,12 @@
+---
+/** Local images go through astro:assets; WordPress images (remote URLs) use a plain <img> with WP's own sizes. */
+import { Image } from 'astro:assets';
+import type { PostImage } from '../../lib/posts';
+interface Props { image: PostImage; class?: string; sizes?: string; eager?: boolean; widths?: number[] }
+const { image, class: className = '', sizes = '100vw', eager = false, widths = [400, 800, 1200] } = Astro.props;
+---
+{typeof image.src === 'string' ? (
+  <img src={image.src} alt={image.alt} width={image.width} height={image.height} loading={eager ? 'eager' : 'lazy'} decoding="async" fetchpriority={eager ? 'high' : undefined} class={className} />
+) : (
+  <Image src={image.src} alt={image.alt} widths={widths} sizes={sizes} quality={70} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} class={className} />
+)}

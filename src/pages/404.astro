@@ -1,0 +1,27 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Icon from '../components/Icon.astro';
+import { TOOLS } from '../config/site';
+const picks = [TOOLS[0], TOOLS[4], TOOLS[1]];
+---
+<MarketingLayout title="Page not found" description="This page doesn't exist." noindex>
+  <section class="relative flex min-h-[100svh] items-center overflow-hidden py-28">
+    <div class="container-pf relative text-center">
+      <p data-fx="label" class="pointer-events-none select-none font-display text-[34vw] font-bold leading-[0.8] tracking-[-0.06em] text-transparent md:text-[18vw]" style="-webkit-text-stroke:1.5px rgb(198 255 61 / 0.35)" aria-hidden="true">404</p>
+      <p class="mt-10 text-6xl">🏋️‍♂️</p>
+      <h1 data-fx="words" class="mx-auto mt-6 max-w-3xl font-display text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[0.95] tracking-[-0.035em]">This page skipped leg day.</h1>
+      <p class="mx-auto mt-5 max-w-md text-lg text-ink/75">It doesn't exist, or it moved. Let's get you back on track.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a href="/" class="btn-primary">Back to home <Icon name="arrow-right" size={16} /></a>
+        <a href="/services" class="btn-secondary">See services</a>
+      </div>
+      <ul class="mx-auto mt-12 grid max-w-3xl gap-3 sm:grid-cols-3">
+        {picks.map((t) => <li><a href={`/tools/${t.slug}`} class="flex items-center gap-3 rounded-[20px] border border-line bg-surface p-4 text-left hover:border-primary/60"><span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary text-night"><Icon name={t.icon} size={18} /></span><span class="text-sm font-semibold">{t.name}</span></a></li>)}
+      </ul>
+    </div>
+  </section>
+</MarketingLayout>
+<script>
+  import { initFx } from '../scripts/fx';
+  initFx();
+</script>

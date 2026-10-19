@@ -1,0 +1,64 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+import ActivitySelect from './ActivitySelect.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs />
+    <ActivitySelect />
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Maintenance calories</p>
+    <p class="mt-1 flex items-baseline gap-2"><span class="t-result-num text-6xl md:text-7xl" data-out="tdee">0</span><span class="text-muted">kcal/day</span></p>
+    <p class="mt-2 text-xs text-muted">BMR <span data-out="bmr">0</span> kcal · Mifflin-St Jeor</p>
+    <ul class="mt-6 space-y-2" data-out="goals"></ul>
+    <p class="mt-4 hidden rounded-xl bg-accent/15 px-3 py-2 text-xs text-[#FF9A6E]" data-out="warn"></p>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bmr, ACTIVITY, bodyMetrics, num, str, wireTool, emitResult, shareUrl, countTo, fmt, round, type Sex } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="calorie-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    const goals = [
+      { k: 'Faster loss', d: -750, w: '≈0.7 kg/week' },
+      { k: 'Weight loss', d: -500, w: '≈0.45 kg/week' },
+      { k: 'Mild loss', d: -250, w: '≈0.25 kg/week' },
+      { k: 'Maintain', d: 0, w: 'stay the same' },
+      { k: 'Lean gain', d: 250, w: '≈0.25 kg/week' },
+      { k: 'Gain', d: 500, w: '≈0.45 kg/week' },
+    ];
+    wireTool(form, () => {
+      const { cm, kg } = bodyMetrics(form);
+      const age = num(form, 'age'); const sex = (str(form, 'sex') || 'male') as Sex;
+      if (!(cm > 100 && kg > 25 && age >= 15)) return;
+      const b = bmr(sex, kg, cm, age);
+      const t = b * (ACTIVITY[str(form, 'activity')]?.f ?? 1.55);
+      const floor = sex === 'male' ? 1500 : 1200;
+      countTo(root.querySelector('[data-out="tdee"]'), round(t, -1));
+      root.querySelector('[data-out="bmr"]')!.textContent = fmt(round(b));
+      root.querySelector('[data-out="goals"]')!.innerHTML = goals.map((g) => {
+        const v = round(t + g.d, -1); const low = v < floor;
+        return `<li class="flex items-center justify-between rounded-2xl border ${g.d === 0 ? 'border-primary/50 bg-primary/10' : 'border-line bg-night/50'} px-4 py-3">
+          <span><span class="font-semibold">${g.k}</span><span class="ml-2 text-xs text-muted">${g.w}</span></span>
+          <span class="font-display text-lg font-bold tabular-nums ${low ? 'text-[#FF9A6E]' : ''}">${fmt(v)}</span></li>`;
+      }).join('');
+      const warn = root.querySelector<HTMLElement>('[data-out="warn"]')!;
+      const tooLow = t - 750 < floor;
+      warn.classList.toggle('hidden', !tooLow);
+      warn.textContent = tooLow ? `Targets in orange fall below ${fmt(floor)} kcal. Going that low is not recommended without professional supervision.` : '';
+      emitResult(form, {
+        tool: 'Calorie Calculator', kicker: 'My maintenance calories', hero: fmt(round(t, -1)), heroUnit: 'kcal / day',
+        stats: [
+          { label: 'Weight loss', value: fmt(round(t - 500, -1)) },
+          { label: 'Maintain', value: fmt(round(t, -1)) },
+          { label: 'Lean gain', value: fmt(round(t + 250, -1)) },
+        ],
+        shareText: `My maintenance is ${fmt(round(t, -1))} kcal/day. Find yours with the free PeriodicFit calorie calculator:`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

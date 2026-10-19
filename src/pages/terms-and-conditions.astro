@@ -1,0 +1,58 @@
+---
+// TODO: legal review before launch.
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { LEGAL, CONTACT, SITE } from '../config/site';
+---
+<LegalLayout title="Terms & Conditions" label="Terms" description={`The terms for using ${SITE.domain}, our free tools and our coaching services.`} intro="Plain-language terms for using our website, tools and coaching. Please read them before you sign up.">
+  <h2>About these terms</h2>
+  <p>These terms apply to {SITE.domain} and to the coaching services offered by {LEGAL.companyName} ("we", "us"). By using the website or our services, you agree to them. If you don't agree, please don't use the website.</p>
+
+  <h2>Eligibility</h2>
+  <p>You must be at least 18 years old to use our coaching services. By signing up, you confirm that the information you give us is accurate.</p>
+
+  <h2>Our services</h2>
+  <p>We offer online personal training, custom diet plans, online dietitian consultations, goal-based programs, home workout plans, women's fitness and yoga & mobility coaching, plus free tools and articles. The exact scope, duration and price of a paid service are confirmed with you before you pay.</p>
+
+  <h2>Health and safety</h2>
+  <ul>
+    <li>Our services are <strong>not medical treatment</strong> and do not replace advice from your doctor. Read our <a href="/disclaimer">Disclaimer</a>.</li>
+    <li>Tell us about any injury, medical condition, pregnancy or medication before you start. We may ask for clearance from your doctor.</li>
+    <li>Stop exercising and seek medical help if you feel pain, dizziness, chest discomfort or shortness of breath.</li>
+    <li>You are responsible for training within your limits and using equipment safely.</li>
+  </ul>
+
+  <h2>Payments, renewals and cancellation</h2>
+  <p>Prices and billing terms are shared with you before you purchase. Unless agreed otherwise, subscriptions renew automatically each billing period until you cancel. You can cancel before the next renewal date by contacting us. Refunds are covered in our <a href="/refund-policy">Refund Policy</a>.</p>
+
+  <h2>Your responsibilities</h2>
+  <ul>
+    <li>Give us honest, up-to-date information.</li>
+    <li>Use our plans for your own personal use only. Don't resell or share them publicly.</li>
+    <li>Don't misuse the website: no attempts to hack, overload, scrape at scale or interfere with it.</li>
+    <li>Treat our coaches with respect. We may end services for abusive behaviour.</li>
+  </ul>
+
+  <h2>Results</h2>
+  <p>Results depend on many things, including consistency, sleep, stress, genetics and health. We don't guarantee any specific outcome, weight loss or muscle gain.</p>
+
+  <h2>Free tools and content</h2>
+  <p>Our calculators, generators and articles give general estimates and information. They are provided "as is" for education and may not suit your individual situation.</p>
+
+  <h2>Intellectual property</h2>
+  <p>The website, brand, designs, text, tools, programs and plans belong to {LEGAL.companyName} or our licensors. You may share links and your own result cards. You may not copy or republish our content without permission.</p>
+
+  <h2>Third-party links and services</h2>
+  <p>We link to other websites and use third-party services (such as WhatsApp or video calling apps). We aren't responsible for their content or policies.</p>
+
+  <h2>Limitation of liability</h2>
+  <p>To the extent the law allows, we are not liable for indirect or consequential losses, or for injury or harm resulting from not following safety guidance or not disclosing health information. Our total liability for any claim is limited to the amount you paid us for the service in the 3 months before the claim. Nothing in these terms limits liability that cannot be limited by law.</p>
+
+  <h2>Suspension and termination</h2>
+  <p>You can stop using our services at any time. We may suspend or end services if you break these terms, with a refund for any unused prepaid period where appropriate.</p>
+
+  <h2>Governing law</h2>
+  <p>These terms are governed by the laws of {LEGAL.jurisdiction}{LEGAL.city && <>, and the courts of {LEGAL.city}</>} have jurisdiction, unless your local consumer law gives you other rights.</p>
+
+  <h2>Changes and contact</h2>
+  <p>We may update these terms and will change the "Last updated" date when we do. Questions? Email <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.</p>
+</LegalLayout>

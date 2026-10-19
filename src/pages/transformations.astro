@@ -1,0 +1,71 @@
+---
+import { Image } from 'astro:assets';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Icon from '../components/Icon.astro';
+import { TRANSFORMATIONS } from '../data/transformations';
+import { SERVICES } from '../config/site';
+const list = TRANSFORMATIONS.filter((t) => t.consent);
+const promises = [
+  { e: '✅', t: 'Real clients only', d: 'No stock photos, no models, no made-up stories.' },
+  { e: '✍️', t: 'Written consent', d: 'Every story is shared with the client’s written permission.' },
+  { e: '📏', t: 'Honest numbers', d: 'Timeframes and results are exactly as reported, never edited.' },
+  { e: '⚖️', t: 'Results vary', d: 'Your journey will be your own. We never promise a specific result.' },
+];
+---
+<MarketingLayout title="Client Transformations" description="Real results from real PeriodicFit clients, shared with their consent. No stock photos, no fake before-and-afters." transparentHeader={false} noindex={list.length === 0}>
+  <section class="relative overflow-hidden pb-16 pt-12 md:pt-16">
+    <span data-speed="0.8" class="pointer-events-none absolute -right-10 top-0 select-none font-display text-[40vw] font-bold leading-none text-transparent md:text-[22vw]" style="-webkit-text-stroke:1px rgb(198 255 61 / 0.12)" aria-hidden="true">✦</span>
+    <div class="container-pf relative">
+      <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">Transformations</li></ol></nav>
+      <h1 data-fx="words" class="max-w-4xl font-display text-[clamp(2.6rem,6.5vw,6rem)] font-bold leading-[0.93] tracking-[-0.04em]">Real people. <span class="text-primary">Real progress.</span></h1>
+      <p class="mt-6 max-w-xl text-lg text-ink/75">Every story here belongs to a real client who chose to share it.</p>
+    </div>
+  </section>
+
+  <section class="relative pb-20">
+    <div class="container-pf">
+      {list.length === 0 ? (
+        <div class="rounded-[28px] border border-dashed border-line bg-surface/60 p-10 text-center md:p-16">
+          <p class="text-5xl">🌱</p>
+          <h2 class="mt-5 font-display text-3xl font-bold md:text-4xl">Our first stories are on their way.</h2>
+          <p class="mx-auto mt-3 max-w-lg text-muted">We only publish real results with written consent, so this page grows as our clients reach their goals. Want to be one of the first?</p>
+          <a href="/contact" data-open-inquiry class="btn-primary mt-8">Start your transformation <Icon name="arrow-right" size={16} /></a>
+        </div>
+      ) : (
+        <ul class="grid gap-5 md:grid-cols-2" data-fx="rise">
+          {list.map((t) => {
+            const svc = SERVICES.find((s) => s.slug === t.service);
+            return (
+              <li data-fx-item class="overflow-hidden rounded-[28px] border border-line bg-surface">
+                {t.before && t.after && (
+                  <div class="grid grid-cols-2 gap-1">
+                    <div class="relative aspect-[3/4]"><Image src={t.before} alt={`${t.name} before`} widths={[300, 500]} sizes="25vw" class="h-full w-full object-cover" /><span class="chip-glass absolute left-3 top-3 text-xs">Before</span></div>
+                    <div class="relative aspect-[3/4]"><Image src={t.after} alt={`${t.name} after ${t.weeks} weeks`} widths={[300, 500]} sizes="25vw" class="h-full w-full object-cover" /><span class="chip-glass absolute left-3 top-3 text-xs">After {t.weeks} weeks</span></div>
+                  </div>
+                )}
+                <div class="p-6">
+                  <p class="font-display text-2xl font-bold text-primary">{t.result}</p>
+                  <p class="mt-3 text-ink/85">“{t.quote}”</p>
+                  <p class="mt-4 text-sm text-muted">{t.name}{t.age ? `, ${t.age}` : ''} · {svc?.name} · {t.weeks} weeks</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <section class="relative pb-24">
+    <div class="container-pf">
+      <p class="eyebrow mb-6">(Our promise)</p>
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-fx="rise">
+        {promises.map((p) => <li data-fx-item class="rounded-[24px] border border-line bg-surface p-6"><span class="text-4xl">{p.e}</span><h3 class="mt-6 font-display text-xl font-bold">{p.t}</h3><p class="mt-2 text-sm text-muted">{p.d}</p></li>)}
+      </ul>
+    </div>
+  </section>
+</MarketingLayout>
+<script>
+  import { initFx } from '../scripts/fx';
+  initFx();
+</script>

@@ -1,0 +1,71 @@
+---
+// TODO: legal review before launch. Values come from LEGAL / CONTACT in src/config/site.ts
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { LEGAL, CONTACT, SITE } from '../config/site';
+---
+<LegalLayout title="Privacy Policy" label="Privacy" description={`How ${SITE.name} collects, uses and protects your personal data.`} intro="We collect as little as possible, never sell your data, and only load analytics or ads after you agree.">
+  <h2>Who we are</h2>
+  <p>{LEGAL.companyName} ("{SITE.name}", "we", "us") runs {SITE.domain}, an online coaching service for personal training, nutrition and recovery. For any privacy question, email <a href={`mailto:${LEGAL.privacyEmail}`}>{LEGAL.privacyEmail}</a>.</p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Inquiry and contact forms:</strong> your name, email, phone/WhatsApp number, the service you're interested in, your goal, age range, preferred contact method, your message, the page you sent it from and campaign (UTM) tags.</li>
+    <li><strong>Messages you send us</strong> on WhatsApp, phone or email.</li>
+    <li><strong>Health and fitness information you choose to share</strong>, for example injuries, medical conditions, diet or body measurements, so we can plan safely. Please share only what you are comfortable with.</li>
+    <li><strong>Usage data</strong>, only if you accept analytics cookies: pages visited, device and browser type, approximate location (city level) and referring site.</li>
+  </ul>
+  <p><strong>Our free tools run in your browser.</strong> The numbers you type into calculators (weight, height, age and so on) are not sent to us or stored by us. If you share a result, the link contains only the values you entered.</p>
+
+  <h2>How we use your data</h2>
+  <ul>
+    <li>To reply to your inquiry and arrange your free consultation.</li>
+    <li>To deliver coaching, meal plans and check-ins if you become a client.</li>
+    <li>To keep the website secure and prevent spam and abuse.</li>
+    <li>To understand which pages are useful and improve them (analytics, with consent).</li>
+    <li>To show ads that keep our tools and articles free (with consent, if ads are enabled).</li>
+  </ul>
+  <p>We do not sell your personal data. We do not use your health information for advertising.</p>
+
+  <h2>Legal basis and consent</h2>
+  <p>We process your data with your consent (for example when you submit a form or accept cookies), to take steps at your request before a contract and to provide our services, and for our legitimate interests in running a safe, working website. Where Indian law applies, we follow the Digital Personal Data Protection Act, 2023. For visitors from the EU/UK we follow the principles of the GDPR.</p>
+
+  <h2>Who we share it with</h2>
+  <p>We use trusted service providers who process data on our behalf:</p>
+  <ul>
+    <li><strong>Web3Forms</strong>: delivers form submissions to our inbox.</li>
+    <li><strong>Cloudflare</strong>: hosting, security and spam protection (including Turnstile).</li>
+    <li><strong>Google Analytics</strong>: anonymous usage statistics, only after you accept analytics cookies.</li>
+    <li><strong>Google AdSense</strong>: advertising, only after you accept advertising cookies and only once ads are switched on. Learn <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">how Google uses data from partner sites</a>.</li>
+    <li><strong>WhatsApp (Meta)</strong>: if you choose to message us there.</li>
+    <li><strong>Our content system (WordPress)</strong>: hosts blog content. It does not receive your form data.</li>
+  </ul>
+  <p>We may also disclose data if required by law or to protect our rights and users' safety.</p>
+
+  <h2>Cookies</h2>
+  <p>We only set non-essential cookies after you agree. See our <a href="/cookie-policy">Cookie Policy</a> for details. You can change your choice at any time with the "Cookie settings" link in the footer.</p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li>Inquiries that don't become clients: up to 12 months, then deleted. {/* TODO: confirm */}</li>
+    <li>Client records: for the duration of coaching plus up to 3 years, unless the law requires longer. {/* TODO: confirm */}</li>
+    <li>Analytics data: as set in Google Analytics (we use the shortest practical retention).</li>
+  </ul>
+
+  <h2>Your rights</h2>
+  <p>You can ask us to access, correct, update or delete your personal data, withdraw consent, or object to certain processing. You can also nominate someone to exercise your rights. Email <a href={`mailto:${LEGAL.privacyEmail}`}>{LEGAL.privacyEmail}</a> and we will respond within 30 days. You may also complain to your local data protection authority.</p>
+
+  <h2>Children</h2>
+  <p>Our services are for adults aged 18 and over. We do not knowingly collect data from children. If you believe a child has sent us data, contact us and we will delete it.</p>
+
+  <h2>Security</h2>
+  <p>The website is served over HTTPS with strict security headers, has no public login or database, and form submissions are protected against spam and bots. Only team members who need your information can access it. No system is perfectly secure, but we work hard to protect your data.</p>
+
+  <h2>International transfers</h2>
+  <p>Some of our providers store data outside your country. Where that happens, we rely on providers that offer appropriate safeguards.</p>
+
+  <h2>Grievance officer and contact</h2>
+  <p>Email <a href={`mailto:${LEGAL.privacyEmail}`}>{LEGAL.privacyEmail}</a>{LEGAL.grievanceOfficer && <> or write to our grievance officer, {LEGAL.grievanceOfficer}</>}. General questions: <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>We will update this page if our practices change and revise the "Last updated" date above. Significant changes will be highlighted on the website.</p>
+</LegalLayout>

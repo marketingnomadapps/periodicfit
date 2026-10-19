@@ -1,0 +1,86 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import Icon from '../Icon.astro';
+const goals = [{ v: 'muscle', l: 'Build muscle', i: 'biceps-flexed' }, { v: 'fatloss', l: 'Lose fat', i: 'flame' }, { v: 'strength', l: 'Get stronger', i: 'dumbbell' }, { v: 'general', l: 'General fitness', i: 'heart-pulse' }];
+const equips = [{ v: 'gym', l: 'Full gym' }, { v: 'dumbbells', l: 'Dumbbells' }, { v: 'bodyweight', l: 'Bodyweight' }];
+---
+<ToolFrame title="Your training setup">
+  <Fragment slot="form">
+    <span class="t-label">Days per week</span>
+    <fieldset class="t-seg mt-2" aria-label="Days per week">
+      {[2, 3, 4, 5, 6].map((d) => <label><input type="radio" name="days" value={d} checked={d === 4} /><span>{d} days</span></label>)}
+    </fieldset>
+    <div class="mt-4">
+      <span class="t-label">Main goal</span>
+      <div class="t-chips mt-2">{goals.map((g, i) => <label><input type="radio" name="goal" value={g.v} checked={i === 0} /><span><Icon name={g.i} size={15} />{g.l}</span></label>)}</div>
+    </div>
+    <div class="mt-4">
+      <span class="t-label">Equipment</span>
+      <fieldset class="t-seg mt-2" aria-label="Equipment">{equips.map((e, i) => <label><input type="radio" name="equip" value={e.v} checked={i === 0} /><span>{e.l}</span></label>)}</fieldset>
+    </div>
+    <div class="mt-4">
+      <span class="t-label">Experience</span>
+      <fieldset class="t-seg mt-2" aria-label="Experience">
+        <label><input type="radio" name="level" value="beginner" /><span>Beginner</span></label>
+        <label><input type="radio" name="level" value="intermediate" checked /><span>Intermediate</span></label>
+        <label><input type="radio" name="level" value="advanced" /><span>Advanced</span></label>
+      </fieldset>
+    </div>
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Your weekly split</p>
+    <p class="mt-1 t-result-num text-4xl md:text-5xl" data-out="name">–</p>
+    <div class="mt-4 grid grid-cols-7 gap-1.5" data-out="week" aria-hidden="true"></div>
+    <div class="mt-5 max-h-[420px] space-y-2 overflow-y-auto pr-1" data-out="days" data-lenis-prevent></div>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { num, str, wireTool, emitResult, shareUrl } from '../../scripts/tools/common';
+  import { EX, SPLITS, SCHEDULE, type Equip } from '../../data/exercises';
+  const root = document.querySelector<HTMLElement>('[data-tool="workout-split-builder"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    const NAMES: Record<number, string> = { 2: 'Full Body ×2', 3: 'Full Body ×3', 4: 'Upper / Lower', 5: 'PPL + Upper/Lower', 6: 'Push Pull Legs ×2' };
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const GOAL_LABEL: Record<string, string> = { muscle: 'muscle', fatloss: 'fat loss', strength: 'strength', general: 'fitness' };
+    wireTool(form, () => {
+      const days = num(form, 'days') || 4;
+      const goal = str(form, 'goal') || 'muscle';
+      const equip = (str(form, 'equip') || 'gym') as Equip;
+      const level = str(form, 'level') || 'intermediate';
+      const split = SPLITS[days];
+      const seen: Record<string, number> = {};
+      const extra = level === 'advanced' ? 1 : level === 'beginner' ? -1 : 0;
+      const plan = split.map((d) => {
+        const list = (level === 'beginner' ? d.patterns.slice(0, 4) : d.patterns).map((p, i) => {
+          const opts = EX[p][equip];
+          const name = opts[(seen[p] = (seen[p] ?? -1) + 1) % opts.length];
+          let sets = 3, reps = '8–12';
+          if (goal === 'strength') { sets = i === 0 ? 5 : 3; reps = i === 0 ? '3–5' : '6–8'; }
+          else if (goal === 'muscle') { sets = i < 2 ? 4 : 3; reps = i < 2 ? '6–10' : '10–15'; }
+          else if (goal === 'fatloss') { sets = 3; reps = '10–15'; }
+          if (p === 'core') reps = '30–45 s';
+          return { name, scheme: `${Math.max(2, sets + extra)} × ${reps}` };
+        });
+        if (goal === 'fatloss' || (goal === 'general' && d === split[split.length - 1])) list.push({ name: EX.cond[equip][0], scheme: 'finisher' });
+        return { ...d, list };
+      });
+      const sched = SCHEDULE[days];
+      root.querySelector('[data-out="name"]')!.textContent = NAMES[days];
+      root.querySelector('[data-out="week"]')!.innerHTML = DAYS.map((dn, i) => {
+        const idx = sched.indexOf(i);
+        return `<div class="rounded-xl ${idx >= 0 ? 'bg-primary text-night' : 'border border-line text-muted'} px-1 py-2 text-center"><p class="text-[0.65rem] font-semibold">${dn}</p><p class="mt-0.5 truncate text-[0.6rem]">${idx >= 0 ? plan[idx].name : 'Rest'}</p></div>`;
+      }).join('');
+      root.querySelector('[data-out="days"]')!.innerHTML = plan.map((d, i) => `<details class="group rounded-2xl border border-line bg-night/55 p-3.5" ${i === 0 ? 'open' : ''}>
+        <summary class="flex cursor-pointer list-none items-center justify-between"><span><span class="text-xs font-semibold text-primary">${DAYS[sched[i]]}</span> <span class="ml-1 font-semibold">${d.name}</span></span><span class="text-xs text-muted">${d.list.length} exercises</span></summary>
+        <ul class="mt-3 space-y-1.5 text-sm">${d.list.map((e) => `<li class="flex justify-between gap-3 border-t border-line pt-1.5"><span>${e.name}</span><span class="shrink-0 font-display text-xs font-semibold text-ink/70">${e.scheme}</span></li>`).join('')}</ul></details>`).join('');
+      emitResult(form, {
+        tool: 'Workout Split Builder', kicker: `My ${days}-day ${GOAL_LABEL[goal]} split`, hero: NAMES[days],
+        list: plan.map((d, i) => `${DAYS[sched[i]]} · ${d.name}: ${d.list.slice(0, 2).map((e) => e.name).join(', ')}`),
+        shareText: `Built my ${days}-day ${GOAL_LABEL[goal]} training split in 10 seconds with PeriodicFit. Build yours:`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

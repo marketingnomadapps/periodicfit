@@ -1,0 +1,17 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import BlogHome from '../../components/blog/BlogHome.astro';
+import { getPosts, getCategories } from '../../lib/posts';
+import { BLOG, SITE } from '../../config/site';
+
+const all = await getPosts();
+const categories = await getCategories();
+const ordered = [...all.filter((p) => p.featured), ...all.filter((p) => !p.featured)];
+const last = Math.max(1, Math.ceil(ordered.length / BLOG.perPage));
+const ld = { '@context': 'https://schema.org', '@type': 'Blog', name: `${SITE.name} Journal`, url: `${SITE.url}/blog`, description: 'Science-backed articles on training, nutrition, diet plans and recovery.' };
+---
+<BlogLayout title="Blog: Fitness, Nutrition & Diet Articles" description="Science-backed articles on workouts, nutrition, diet plans, weight loss and recovery from PeriodicFit coaches and dietitians." darkHeader>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <link slot="head" rel="alternate" type="application/rss+xml" title="PeriodicFit Journal" href="/rss.xml" />
+  <BlogHome posts={ordered.slice(0, BLOG.perPage)} all={all} categories={categories} page={{ current: 1, last }} />
+</BlogLayout>

@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Icon from '../components/Icon.astro';
+import Ribbons from '../components/fx/Ribbons.astro';
+import gymMan from '../assets/images/about/gym-man.jpg';
+import team from '../assets/images/about/team.jpg';
+import bands from '../assets/images/about/bands.jpg';
+import group from '../assets/images/about/group.jpg';
+
+// TODO: replace roles with real coach names, photos, certifications and years of experience.
+const coaches = [
+  { role: 'Head Strength Coach', focus: ['Strength', 'Hypertrophy', 'Form coaching'], img: gymMan, e: '🏋️' },
+  { role: 'Lead Dietitian', focus: ['Clinical nutrition', 'PCOS & diabetes', 'Indian diets'], img: team, e: '🥗' },
+  { role: 'Yoga & Mobility Coach', focus: ['Mobility', 'Posture', 'Recovery'], img: bands, e: '🧘' },
+  { role: "Women's Fitness Coach", focus: ['Strength for women', 'Postpartum return', 'Energy-based plans'], img: group, e: '💪' },
+];
+// TODO: confirm these hiring standards with the client.
+const standards = [
+  { icon: 'graduation-cap', t: 'Recognised certifications', d: 'Coaches hold accredited personal training or strength & conditioning certifications.' },
+  { icon: 'stethoscope', t: 'Qualified dietitians', d: 'Nutrition consults are run by dietitians with a degree in nutrition or dietetics.' },
+  { icon: 'shield-check', t: 'Safety first', d: 'Every new client is screened for injuries and medical conditions before training starts.' },
+  { icon: 'book-open', t: 'Always learning', d: 'Our team reviews current research and updates how we coach.' },
+];
+const facts = [{ e: '🎓', t: 'Certified coaches' }, { e: '🥗', t: 'Qualified dietitians' }, { e: '📹', t: 'Video form reviews' }, { e: '🗓️', t: 'Weekly check-ins' }, { e: '💬', t: 'WhatsApp support' }];
+---
+<MarketingLayout title="Our Coaches & Dietitians" description="Meet the PeriodicFit team: certified coaches and qualified dietitians who build your training and nutrition plan and check in every week." transparentHeader={false}>
+  <section class="relative overflow-hidden pb-16 pt-12 md:pt-16">
+    <div class="pointer-events-none absolute -left-40 top-0 h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.12),transparent_65%)]" aria-hidden="true"></div>
+    <div class="container-pf">
+      <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li><a href="/about" class="hover:text-primary">About</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">Coaches</li></ol></nav>
+      <h1 data-fx="words" class="max-w-4xl font-display text-[clamp(2.6rem,6.5vw,6rem)] font-bold leading-[0.93] tracking-[-0.04em]">The people behind <span class="text-primary">your plan.</span></h1>
+      <p class="mt-6 max-w-xl text-lg text-ink/75">Real coaches and dietitians, not algorithms. They write your plan, review your form and check in every week.</p>
+    </div>
+  </section>
+
+  <section class="relative pb-20">
+    <div class="container-pf">
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-fx="rise">
+        {coaches.map((c, i) => (
+          <li data-fx-item>
+            <div data-fx="tilt" data-speed={String([0.1, 0.5, 0.25, 0.65][i])} class="group relative aspect-[3/4] overflow-hidden rounded-[28px] border border-line">
+              <Image src={c.img} alt="" widths={[360, 600]} sizes="(min-width: 1024px) 25vw, 50vw" quality={65} class="absolute inset-0 h-full w-full object-cover grayscale transition-[filter,transform] duration-700 ease-out-expo group-hover:scale-105 group-hover:grayscale-0" />
+              <div class="absolute inset-0 bg-gradient-to-t from-night via-night/40 to-transparent"></div>
+              <span class="chip-glass absolute left-4 top-4 text-lg">{c.e}</span>
+              <div class="absolute inset-x-0 bottom-0 p-5">
+                <p class="font-display text-xl font-bold">{c.role}</p>
+                <ul class="mt-2 flex flex-wrap gap-1.5">{c.focus.map((f) => <li class="rounded-pill bg-white/10 px-2.5 py-1 text-xs">{f}</li>)}</ul>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-6 text-sm text-muted">Full profiles with names and certifications are coming soon.</p>
+    </div>
+  </section>
+
+  <Ribbons items={facts} />
+
+  <section class="relative py-20 md:py-28">
+    <div class="container-pf">
+      <p class="eyebrow mb-4">(Our standards)</p>
+      <h2 data-fx="words" class="mb-12 max-w-3xl font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Who gets to coach you.</h2>
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-fx="rise">
+        {standards.map((s) => (
+          <li data-fx-item class="rounded-[24px] border border-line bg-surface p-6">
+            <span class="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-night"><Icon name={s.icon} size={22} /></span>
+            <h3 class="mt-8 font-display text-xl font-bold">{s.t}</h3>
+            <p class="mt-2 text-sm text-muted">{s.d}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="relative py-20 text-center md:py-28">
+    <div class="container-pf">
+      <h2 data-fx="words" class="mx-auto max-w-3xl font-display text-[clamp(2.2rem,5vw,4.5rem)] font-bold leading-[0.98] tracking-[-0.03em]">Talk to a coach. <span class="text-primary">It's free.</span></h2>
+      <a href="/contact" data-open-inquiry data-fx="magnetic" class="btn-primary mt-9 px-8 py-4 text-base">Book Free Consultation <Icon name="arrow-right" size={18} /></a>
+    </div>
+  </section>
+</MarketingLayout>
+<script>
+  import { initFx } from '../scripts/fx';
+  initFx();
+</script>

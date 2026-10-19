@@ -1,0 +1,48 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs fields={['sex', 'height']} />
+    <p class="mt-4 text-xs text-muted">Formulas were designed for adults roughly 152–213 cm (5–7 ft) tall.</p>
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Healthy weight range (BMI 18.5–24.9)</p>
+    <p class="mt-1 t-result-num text-5xl md:text-6xl" data-out="range">–</p>
+    <p class="mt-6 text-sm text-ink/70">Classic ideal-weight formulas</p>
+    <ul class="mt-2 grid grid-cols-2 gap-2" data-out="formulas"></ul>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bodyMetrics, str, wireTool, emitResult, shareUrl, fmt } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="ideal-weight-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    // kg = base + per-inch over 5 ft
+    const F: Record<string, { male: [number, number]; female: [number, number] }> = {
+      'Robinson (1983)': { male: [52, 1.9], female: [49, 1.7] },
+      'Miller (1983)': { male: [56.2, 1.41], female: [53.1, 1.36] },
+      'Devine (1974)': { male: [50, 2.3], female: [45.5, 2.3] },
+      'Hamwi (1964)': { male: [48, 2.7], female: [45.5, 2.2] },
+    };
+    wireTool(form, () => {
+      const { cm, unit } = bodyMetrics(form);
+      const sex = (str(form, 'sex') || 'male') as 'male' | 'female';
+      if (!(cm > 120)) return;
+      const over = Math.max(0, cm / 2.54 - 60);
+      const k = unit === 'imperial' ? 2.20462 : 1, u = unit === 'imperial' ? 'lb' : 'kg';
+      const m = cm / 100, lo = 18.5 * m * m * k, hi = 24.9 * m * m * k;
+      root.querySelector('[data-out="range"]')!.textContent = `${fmt(lo)}–${fmt(hi)} ${u}`;
+      const vals = Object.entries(F).map(([n, f]) => [n, (f[sex][0] + f[sex][1] * over) * k] as const);
+      root.querySelector('[data-out="formulas"]')!.innerHTML = vals.map(([n, v]) => `<li class="t-stat"><p class="text-xs text-muted">${n}</p><p class="mt-1 font-display text-xl font-bold">${fmt(v, 1)} ${u}</p></li>`).join('');
+      emitResult(form, {
+        tool: 'Ideal Weight Calculator', kicker: 'My healthy weight range', hero: `${fmt(lo)}–${fmt(hi)}`, heroUnit: u,
+        stats: vals.slice(0, 3).map(([n, v]) => ({ label: n.split(' ')[0], value: `${fmt(v, 1)} ${u}` })),
+        shareText: 'What should you weigh for your height? Find your healthy range free:',
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

@@ -1,0 +1,33 @@
+---
+// TODO: legal review before launch.
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { SITE } from '../config/site';
+---
+<LegalLayout title="Disclaimer" label="Disclaimer" description={`Medical and fitness disclaimer for ${SITE.domain}.`} intro="Please read this before starting any program, diet or exercise you find on this website.">
+  <h2>Not medical advice</h2>
+  <p>All content on {SITE.domain}, including articles, tools, videos, plans and coaching, is for general information and education only. It is <strong>not medical advice</strong> and does not replace diagnosis or treatment by a doctor or other qualified health professional.</p>
+
+  <h2>Consult your doctor first</h2>
+  <p>Speak with a qualified doctor before starting any exercise or nutrition program, especially if you:</p>
+  <ul>
+    <li>have a medical condition such as heart disease, high blood pressure, diabetes, thyroid disorders or kidney disease;</li>
+    <li>are pregnant, recently gave birth or are breastfeeding;</li>
+    <li>take medication, have an injury, or have a history of eating disorders;</li>
+    <li>have been inactive for a long time or are over 65.</li>
+  </ul>
+
+  <h2>No doctor–patient relationship</h2>
+  <p>Using this website or our coaching does not create a doctor–patient relationship. Dietitian consultations offer nutrition guidance and do not replace care from your doctor.</p>
+
+  <h2>Stop if something feels wrong</h2>
+  <p>Stop exercising immediately and seek medical help if you feel chest pain, dizziness, faintness, severe shortness of breath or unusual pain. <strong>In an emergency, call your local emergency number.</strong></p>
+
+  <h2>Tools give estimates</h2>
+  <p>Our calculators and generators use published formulas (for example Mifflin-St Jeor, the US Navy body fat method, Epley and Brzycki) and approximate food values. They give estimates for healthy adults and can be wrong for you. Don't use them to diagnose or treat any condition.</p>
+
+  <h2>Results vary</h2>
+  <p>Client stories and examples show individual experiences. Your results depend on your starting point, consistency, health and many other factors. We don't promise any specific result.</p>
+
+  <h2>Ads and links</h2>
+  <p>We may show ads to keep our free tools and articles free. Ads don't influence our recommendations. We may link to other websites, and we aren't responsible for their content.</p>
+</LegalLayout>

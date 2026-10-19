@@ -1,0 +1,34 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import Statement from '../components/home/Statement.astro';
+import Services from '../components/home/Services.astro';
+import HowItWorks from '../components/home/HowItWorks.astro';
+import Programs from '../components/home/Programs.astro';
+import Numbers from '../components/home/Numbers.astro';
+import Nutrition from '../components/home/Nutrition.astro';
+import LatestPosts from '../components/home/LatestPosts.astro';
+import FAQ from '../components/FAQ.astro';
+import FinalCTA from '../components/home/FinalCTA.astro';
+import { SITE } from '../config/site';
+import { HOME_FAQ } from '../data/home';
+---
+<MarketingLayout
+  title={SITE.name}
+  description="Online personal training, dietitian consultations and custom diet & workout plans built around your goal, food and schedule. Book a free consultation."
+>
+  <Hero />
+  <Statement />
+  <Services />
+  <HowItWorks />
+  <Programs />
+  <Numbers />
+  <Nutrition />
+  <LatestPosts />
+  <FAQ items={HOME_FAQ} />
+  <FinalCTA />
+</MarketingLayout>
+
+<script>
+  import '../scripts/home';
+</script>

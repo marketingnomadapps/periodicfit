@@ -1,0 +1,74 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs fields={['weight']} />
+    <label class="t-field mt-3"><span class="t-label">Your situation</span>
+      <select name="profile" class="t-select">
+        <option value="sedentary">Mostly inactive</option>
+        <option value="active">Active / endurance training</option>
+        <option value="muscle" selected>Building muscle (strength training)</option>
+        <option value="cut">Losing fat while training</option>
+        <option value="older">Age 65+</option>
+      </select>
+    </label>
+    <div class="mt-4">
+      <span class="t-label">Meals per day</span>
+      <fieldset class="t-seg mt-2" aria-label="Meals per day">
+        {[3, 4, 5].map((m) => <label><input type="radio" name="meals" value={m} checked={m === 4} /><span>{m}</span></label>)}
+      </fieldset>
+    </div>
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Daily protein target</p>
+    <p class="mt-1 flex items-baseline gap-2"><span class="t-result-num text-6xl md:text-7xl" data-out="target">0</span><span class="text-muted">g/day</span></p>
+    <p class="mt-2 text-sm text-muted">Range <span data-out="range">–</span> · <span data-out="perkg">–</span></p>
+    <div class="mt-5 rounded-2xl border border-line bg-night/50 p-4">
+      <p class="text-xs text-muted">Per meal</p>
+      <p class="mt-1 font-display text-2xl font-bold"><span data-out="meal">0</span> g <span class="text-sm font-medium text-muted">× <span data-out="meals">4</span> meals</span></p>
+    </div>
+    <p class="mt-5 text-xs text-muted">That's roughly the same protein as…</p>
+    <ul class="mt-2 grid grid-cols-2 gap-2 text-sm" data-out="foods"></ul>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bodyMetrics, num, str, wireTool, emitResult, shareUrl, countTo, round } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="protein-intake-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    const RANGES: Record<string, [number, number, string]> = {
+      sedentary: [0.8, 1.0, 'general health'], active: [1.2, 1.6, 'active lifestyle'], muscle: [1.6, 2.2, 'muscle gain'],
+      cut: [1.8, 2.2, 'fat loss'], older: [1.0, 1.2, 'healthy ageing'],
+    };
+    // Approximate protein per serving
+    const FOODS = [
+      { n: 'eggs', g: 6, unit: '' }, { n: 'g paneer', g: 0.18, unit: 'g' }, { n: 'g chicken breast', g: 0.31, unit: 'g' },
+      { n: 'g Greek yogurt', g: 0.1, unit: 'g' }, { n: 'g cooked lentils', g: 0.09, unit: 'g' }, { n: 'scoops whey', g: 24, unit: '' },
+    ];
+    wireTool(form, () => {
+      const { kg } = bodyMetrics(form);
+      if (!(kg > 25)) return;
+      const [lo, hi, label] = RANGES[str(form, 'profile')] ?? RANGES.muscle;
+      const target = round(kg * (lo + hi) / 2);
+      const meals = num(form, 'meals') || 4;
+      countTo(root.querySelector('[data-out="target"]'), target);
+      root.querySelector('[data-out="range"]')!.textContent = `${round(kg * lo)}–${round(kg * hi)} g`;
+      root.querySelector('[data-out="perkg"]')!.textContent = `${lo}–${hi} g/kg`;
+      countTo(root.querySelector('[data-out="meal"]'), round(target / meals));
+      root.querySelector('[data-out="meals"]')!.textContent = String(meals);
+      root.querySelector('[data-out="foods"]')!.innerHTML = FOODS.map((f) => {
+        const q = f.unit === 'g' ? `${round(target / f.g, -1)}` : `${round(target / f.g)}`;
+        return `<li class="rounded-xl bg-night/50 px-3 py-2"><span class="font-display font-bold">${q}</span> ${f.n}</li>`;
+      }).join('');
+      emitResult(form, {
+        tool: 'Protein Calculator', kicker: `My daily protein for ${label}`, hero: `${target} g`, heroUnit: 'protein / day',
+        stats: [{ label: 'Per meal', value: `${round(target / meals)} g` }, { label: 'Range', value: `${round(kg * lo)}–${round(kg * hi)} g` }, { label: 'Eggs equal', value: `${round(target / 6)}` }],
+        shareText: `I need about ${target}g of protein a day for ${label}. How much do you need?`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

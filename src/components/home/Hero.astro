@@ -1,0 +1,109 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { IMG } from '../../data/images';
+import BmiCalculator from '../tools/BmiCalculator.astro';
+
+const points = [
+  { icon: 'dumbbell', label: 'Online coaching' },
+  { icon: 'salad', label: 'Dietitians' },
+  { icon: 'clipboard-list', label: 'Custom plans' },
+];
+const cards = [
+  { img: IMG.heroCard1, alt: 'Woman focused before a heavy lift', label: 'Coaching' },
+  { img: IMG.heroCard2, alt: 'Hand gripping a barbell next to a weight plate', label: 'Strength' },
+  { img: IMG.heroCard3, alt: 'Woman doing a dumbbell row in the gym', label: 'Women’s fitness' },
+];
+---
+<section id="hero" data-section-bg="#0E0F12" class="hero relative min-h-[100svh] overflow-hidden bg-night lg:h-[100svh] lg:min-h-[680px]">
+  <!-- Layer 1: photo -->
+  <div class="hero-bg hero-bg-shift absolute inset-x-0 top-0 h-[100svh] overflow-hidden will-change-transform lg:inset-0 lg:left-[26%] lg:h-auto" aria-hidden="true">
+    <Image
+      src={IMG.heroBg}
+      alt=""
+      widths={[800, 1200, 1600]}
+      sizes="(min-width: 1024px) 74vw, (max-width: 767px) 330vw, 150vw"
+      quality={70}
+      loading="eager"
+      fetchpriority="high"
+      class="h-full w-full scale-110 object-cover object-[53%_45%] opacity-90"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-night via-night/30 to-night/60"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_38%,rgb(198_255_61/0.16),transparent_55%)]"></div>
+  </div>
+
+  <!-- Layer 2: outlined word, slow drift -->
+  <p
+    aria-hidden="true"
+    class="hero-ghost pointer-events-none absolute right-0 top-[8%] select-none font-display text-[34vw] font-bold leading-none tracking-[-0.05em] text-transparent will-change-transform md:text-[22vw]"
+    style="-webkit-text-stroke: 1px rgb(198 255 61 / 0.16);"
+  >MOVE</p>
+
+  <!-- Layer 3: BMI tool (transparent glass so the photo shows through). Desktop: floats right. Mobile: in flow below buttons. -->
+  <div class="hero-tool hero-intro absolute right-[max(1rem,calc((100vw-80rem)/2+2rem))] top-[15%] z-10 hidden w-[330px] [@media(min-height:860px)]:top-[19%] will-change-transform lg:block xl:w-[350px]">
+    <BmiCalculator id="hero-bmi" />
+  </div>
+
+  <!-- Layer 4: content -->
+  <div class="hero-content hero-intro container-pf relative flex min-h-[100svh] flex-col justify-end pb-8 pt-[38svh] md:pb-12 lg:h-full lg:min-h-0 lg:pt-28">
+    <div class="hero-copy will-change-transform">
+      <h1 class="hero-title max-w-5xl text-[clamp(2.9rem,7.4vw,7.5rem)] font-bold leading-[0.92] tracking-[-0.03em]">
+        <span class="block">Fitness, built</span>
+        <span class="block"><span class="text-primary">element</span> by</span>
+        <span class="block">element.</span>
+      </h1>
+      <ul class="hero-points mt-6 flex flex-wrap gap-2 md:mt-8">
+        {points.map((p) => (
+          <li class="inline-flex items-center gap-2 rounded-pill border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-ink md:text-sm">
+            <Icon name={p.icon} size={15} class="text-primary" />{p.label}
+          </li>
+        ))}
+      </ul>
+      <div class="hero-sub mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:justify-between">
+        <p class="max-w-md text-base text-ink/75 md:text-lg">
+          1:1 coaching and dietitian-built meal plans that fit your schedule, your food and your goal.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/contact" data-open-inquiry class="btn-primary">Book Free Consultation <Icon name="arrow-right" size={16} /></a>
+          <a href="#services" class="btn-secondary">Explore services</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-tool-mobile mt-8 max-w-md lg:hidden">
+      <BmiCalculator id="hero-bmi-m" />
+    </div>
+
+    <div class="hero-bar mt-10 hidden items-end justify-between gap-8 border-t border-white/10 pt-6 md:flex">
+      <ul class="flex gap-3">
+        {cards.map((c) => (
+          <li class="group">
+            <span class="mb-2 block text-xs text-muted">{c.label}</span>
+            <div class="h-24 w-20 overflow-hidden rounded-xl lg:h-28 lg:w-24">
+              <Image src={c.img} alt={c.alt} widths={[192]} sizes="96px" quality={70} class="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110" />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <a href="#statement" class="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-muted hover:text-primary">
+        <span class="relative block h-12 w-px overflow-hidden bg-white/15">
+          <span class="scroll-cue absolute inset-x-0 top-0 h-1/2 bg-primary"></span>
+        </span>
+        Scroll
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Mobile/tablet: photo dissolves into the page under the buttons (no hard bottom edge) */
+  @media (max-width: 1023px) {
+    .hero-bg-shift { -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 96%); mask-image: linear-gradient(to bottom, #000 55%, transparent 96%); }
+  }
+  /* Desktop: photo shifted right, its left edge dissolves into the page (no hard line) */
+  @media (min-width: 1024px) {
+    .hero-bg-shift { -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 38%); mask-image: linear-gradient(to right, transparent 0%, #000 38%); }
+  }
+  @keyframes cue { 0% { transform: translateY(-100%); } 100% { transform: translateY(200%); } }
+  .scroll-cue { animation: cue 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+</style>

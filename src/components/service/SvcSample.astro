@@ -1,0 +1,60 @@
+---
+import Icon from '../Icon.astro';
+import type { ServiceContent } from '../../data/services';
+interface Props { content: ServiceContent; slug: string }
+const { content, slug } = Astro.props;
+const FREE = 3; // first N cards readable, rest blurred teaser
+---
+<section id="sample" class="relative overflow-hidden bg-surface/40 py-24 md:py-36">
+  <div class="container-pf">
+    <div class="mb-12 flex flex-col justify-between gap-6 md:mb-16 md:flex-row md:items-end">
+      <div>
+        <p class="eyebrow mb-4">(Sample plan)</p>
+        <h2 class="svc-heading text-[clamp(2.2rem,5.5vw,4.5rem)] font-bold leading-[0.98] tracking-[-0.03em]">{content.sample.title}.</h2>
+      </div>
+      <p class="max-w-sm text-muted">{content.sample.note} Your real plan is built around you.</p>
+    </div>
+
+    <ul class="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+      {content.sample.days.map((d, i) => (
+        <li class="sp-card [perspective:1200px]">
+          <div class="sp-inner relative h-full min-h-[200px] [transform-style:preserve-3d] md:min-h-[230px]">
+            <!-- Front -->
+            <div class="sp-front relative flex h-full flex-col rounded-[22px] border border-line bg-night p-5 [backface-visibility:hidden]">
+              <div class="flex items-center justify-between">
+                <span class="rounded-pill bg-primary/15 px-2.5 py-1 font-display text-xs font-bold text-primary">{d.day}</span>
+                <Icon name={content.sample.kind === 'meals' ? 'utensils' : 'dumbbell'} size={16} class="text-muted" />
+              </div>
+              <h3 class="mt-4 font-display text-lg font-bold leading-tight">{d.title}</h3>
+              <ul class:list={['mt-3 space-y-1.5 text-sm text-muted', i >= FREE && 'select-none blur-[5px]']} aria-hidden={i >= FREE ? 'true' : undefined}>
+                {d.items.map((it) => <li>{it}</li>)}
+              </ul>
+              {i >= FREE && (
+                <span class="absolute bottom-4 right-4 grid h-8 w-8 place-items-center rounded-full bg-surface-2 text-ink/70" title="Unlocks with your plan"><Icon name="lock" size={14} /></span>
+              )}
+            </div>
+            <!-- Back (seen while the card flips in) -->
+            <div class="sp-back absolute inset-0 grid place-items-center rounded-[22px] bg-primary text-night [backface-visibility:hidden] [transform:rotateY(180deg)]" aria-hidden="true">
+              <span class="font-display text-4xl font-bold">{d.day}</span>
+            </div>
+          </div>
+        </li>
+      ))}
+      <li class="sp-card [perspective:1200px]">
+        <div class="sp-inner relative h-full min-h-[200px] [transform-style:preserve-3d] md:min-h-[230px]">
+          <div class="sp-front flex h-full flex-col justify-between rounded-[22px] bg-primary p-5 text-night [backface-visibility:hidden]">
+            <Icon name="lock-open" size={26} />
+            <div>
+              <h3 class="font-display text-lg font-bold leading-tight">Get your full plan</h3>
+              <p class="mt-1 text-sm text-night/75">Built for your body and schedule.</p>
+              <button type="button" data-open-inquiry data-service={slug} class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold underline underline-offset-4">Start free <Icon name="arrow-right" size={14} /></button>
+            </div>
+          </div>
+          <div class="sp-back absolute inset-0 grid place-items-center rounded-[22px] bg-surface-2 [backface-visibility:hidden] [transform:rotateY(180deg)]" aria-hidden="true">
+            <Icon name="sparkles" size={36} class="text-primary" />
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>

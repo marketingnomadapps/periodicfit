@@ -1,0 +1,45 @@
+---
+/** Shared body inputs with metric/imperial toggle. Field names: unit, sex, age, cm|ft+in, kg|lb */
+interface Props { fields?: ('sex' | 'age' | 'height' | 'weight')[]; weightLabel?: string; defaults?: { age?: number; cm?: number; kg?: number; sex?: 'male' | 'female' } }
+const { fields = ['sex', 'age', 'height', 'weight'], weightLabel = 'Weight', defaults = {} } = Astro.props;
+const { age = 30, cm = 170, kg = 72, sex = 'male' } = defaults;
+const ftIn = Math.round(cm / 2.54);
+const has = (f: string) => fields.includes(f as never);
+---
+<div class="flex flex-wrap items-center justify-between gap-3">
+  {has('sex') ? (
+    <fieldset class="t-seg" aria-label="Sex">
+      <label><input type="radio" name="sex" value="male" checked={sex === 'male'} /><span>Male</span></label>
+      <label><input type="radio" name="sex" value="female" checked={sex === 'female'} /><span>Female</span></label>
+    </fieldset>
+  ) : <span />}
+  {(has('height') || has('weight')) && (
+    <fieldset class="t-seg" aria-label="Units">
+      <label><input type="radio" name="unit" value="metric" checked /><span>kg / cm</span></label>
+      <label><input type="radio" name="unit" value="imperial" /><span>lb / ft</span></label>
+    </fieldset>
+  )}
+</div>
+<div class="mt-4 grid grid-cols-2 gap-3">
+  {has('age') && (
+    <label class="t-field"><span class="t-label">Age</span><span class="t-input"><input type="number" name="age" inputmode="numeric" min="15" max="90" value={age} /><em>years</em></span></label>
+  )}
+  {has('height') && (
+    <>
+      <label class="t-field" data-unit="metric"><span class="t-label">Height</span><span class="t-input"><input type="number" name="cm" inputmode="decimal" min="120" max="230" step="0.5" value={cm} /><em>cm</em></span></label>
+      <div class="t-field" data-unit="imperial" hidden>
+        <span class="t-label">Height</span>
+        <span class="grid grid-cols-2 gap-2">
+          <span class="t-input"><input type="number" name="ft" inputmode="numeric" min="4" max="7" value={Math.floor(ftIn / 12)} aria-label="Feet" /><em>ft</em></span>
+          <span class="t-input"><input type="number" name="in" inputmode="numeric" min="0" max="11" value={ftIn % 12} aria-label="Inches" /><em>in</em></span>
+        </span>
+      </div>
+    </>
+  )}
+  {has('weight') && (
+    <>
+      <label class="t-field" data-unit="metric"><span class="t-label">{weightLabel}</span><span class="t-input"><input type="number" name="kg" inputmode="decimal" min="30" max="250" step="0.1" value={kg} /><em>kg</em></span></label>
+      <label class="t-field" data-unit="imperial" hidden><span class="t-label">{weightLabel}</span><span class="t-input"><input type="number" name="lb" inputmode="decimal" min="66" max="550" step="0.5" value={Math.round(kg * 2.20462)} /><em>lb</em></span></label>
+    </>
+  )}
+</div>

@@ -1,0 +1,73 @@
+---
+import '../styles/global.css';
+import SEO, { type SEOProps } from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import InquiryModal from '../components/InquiryModal.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+import { FORMS } from '../config/site';
+
+interface Props extends SEOProps {
+  /** 'dark' = marketing pages, 'light' = blog reading pages */
+  theme?: 'dark' | 'light';
+  /** Header starts transparent over a hero */
+  transparentHeader?: boolean;
+  /** 'full' = Lenis + parallax + reveals, 'subtle' = fade-ins only, 'none' = static */
+  motion?: 'full' | 'subtle' | 'none';
+  /** Service slug: preselects the inquiry form */
+  service?: string;
+  /** Auto-open the inquiry popup (service pages only, never blog) */
+  autoInquiry?: boolean;
+  /** Light page but dark header (e.g. blog home with a dark hero) */
+  darkHeader?: boolean;
+}
+
+const { theme = 'dark', transparentHeader = false, motion = 'subtle', service, autoInquiry = false, darkHeader = false, ...seo } = Astro.props;
+const autoAttr = autoInquiry && FORMS.autoPopup ? String(FORMS.autoPopupDelayMs) : undefined;
+---
+<!doctype html>
+<html lang="en" data-motion={motion}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content={theme === 'light' ? '#FFFFFF' : '#0E0F12'} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+
+    <SEO {...seo} />
+    <slot name="head" />
+
+    <!-- Hide [data-reveal] content only when JS will animate it in (no-JS + reduced motion stay visible) -->
+    {motion !== 'none' && (
+      <script is:inline>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js-motion');
+      </script>
+    )}
+  </head>
+  <body data-theme={theme} data-service={service} data-auto-inquiry={autoAttr}>
+    <Header transparent={transparentHeader} light={theme === 'light' && !darkHeader} />
+    <main id="main" class:list={[!transparentHeader && 'pt-16 lg:pt-20']}>
+      <slot />
+    </main>
+    <Footer />
+    <InquiryModal service={service} />
+    <WhatsAppButton />
+    <CookieBanner />
+    <slot name="body-end" />
+
+    <script>
+      import { initLenis } from '../scripts/lenis';
+      import { initReveals } from '../scripts/reveal';
+      import { initParallax } from '../scripts/parallax';
+
+      const motion = document.documentElement.dataset.motion;
+      if (motion === 'full') {
+        initLenis();
+        initParallax();
+      }
+      if (motion !== 'none') initReveals();
+    </script>
+  </body>
+</html>

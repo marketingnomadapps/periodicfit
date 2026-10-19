@@ -1,0 +1,22 @@
+---
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import BlogListing from '../../../components/blog/BlogListing.astro';
+import { getPosts, getCategories } from '../../../lib/posts';
+import { BLOG } from '../../../config/site';
+
+export async function getStaticPaths() {
+  const all = await getPosts();
+  const last = Math.ceil(all.length / BLOG.perPage);
+  return Array.from({ length: Math.max(0, last - 1) }, (_, i) => ({ params: { page: String(i + 2) } }));
+}
+const n = Number(Astro.params.page);
+const all = await getPosts();
+const ordered = [...all.filter((p) => p.featured), ...all.filter((p) => !p.featured)];
+const last = Math.ceil(ordered.length / BLOG.perPage);
+const categories = await getCategories();
+---
+<BlogLayout title={`Blog: page ${n}`} description="More science-backed fitness and nutrition articles from PeriodicFit.">
+  <BlogListing posts={ordered.slice((n - 1) * BLOG.perPage, n * BLOG.perPage)} all={all} categories={categories}
+    heading="Train smarter. Eat better." intro={`Page ${n} of ${last}.`} page={{ current: n, last, base: '/blog' }}
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog' }, { label: `Page ${n}` }]} />
+</BlogLayout>

@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { IMG } from '../../data/images';
+
+const words = ['Train', 'Eat', 'Recover', 'Repeat'];
+---
+<section id="final-cta" data-section-bg="#0E0F12" class="final-cta relative overflow-hidden py-24 md:py-40" data-parallax-root>
+  <div class="absolute inset-0" aria-hidden="true">
+    <div class="absolute -inset-y-[15%] inset-x-0" data-parallax="0.5">
+      <Image src={IMG.ctaBg} alt="" widths={[800, 1600]} sizes="100vw" quality={60} class="h-full w-full object-cover opacity-30" />
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-night via-night/60 to-night"></div>
+  </div>
+
+  <!-- Scroll-driven marquee -->
+  <div class="relative mb-16 overflow-hidden md:mb-20" aria-hidden="true">
+    <div class="cta-marquee flex w-max gap-8 whitespace-nowrap font-display text-[clamp(4rem,14vw,13rem)] font-bold leading-none tracking-[-0.04em]">
+      {[...words, ...words, ...words].map((w, i) => (
+        <span class:list={[i % 2 ? 'text-transparent' : 'text-ink']} style={i % 2 ? '-webkit-text-stroke: 1.5px var(--color-primary)' : ''}>{w} ·</span>
+      ))}
+    </div>
+  </div>
+
+  <div class="container-pf relative text-center">
+    <ul class="mb-10 flex flex-wrap justify-center gap-2">
+      {[
+        { icon: 'phone', t: 'Free consultation call' },
+        { icon: 'clock', t: 'Reply within 24 hours' },
+        { icon: 'circle-check', t: 'Plans for every level' },
+      ].map((c) => (
+        <li class="cta-chip inline-flex items-center gap-2 rounded-pill border border-white/15 bg-white/5 px-4 py-2 text-sm text-ink"><Icon name={c.icon} size={16} class="text-primary" />{c.t}</li>
+      ))}
+    </ul>
+    <h2 class="split-heading mx-auto max-w-4xl text-[clamp(2.4rem,6vw,5.5rem)] font-bold leading-[0.95] tracking-[-0.03em]">Your first phase starts with a free call.</h2>
+    <p class="mx-auto mt-6 max-w-lg text-lg text-ink/75">Tell us your goal. A coach replies within 24 hours with next steps. No payment needed to talk.</p>
+    <div class="mt-10 flex flex-wrap justify-center gap-3">
+      <a href="/contact" data-open-inquiry class="btn-primary px-8 py-4 text-base">Book Free Consultation <Icon name="arrow-right" size={18} /></a>
+      <a href="/tools/bmi-calculator" class="btn-secondary px-8 py-4 text-base">Try free tools</a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,197 @@
+---
+/**
+ * Blog home (/blog): magazine-style, parallax. Article pages stay light and fast for reading / AdSense.
+ * Effects come from src/scripts/fx.ts (stack, words, label, rise, tilt, clip, stickers, data-speed).
+ */
+import { Image } from 'astro:assets';
+import PostImage from './PostImage.astro';
+import PostCard from './PostCard.astro';
+import Icon from '../Icon.astro';
+import type { Post } from '../../lib/posts';
+import { TOOL_IMG } from '../../data/toolMedia';
+
+interface Props { posts: Post[]; all: Post[]; categories: { name: string; slug: string; count: number }[]; page: { current: number; last: number } }
+const { posts, all, categories, page } = Astro.props;
+const featured = posts[0];
+const rest = posts.slice(1);
+const stackImgs = posts.filter((p) => p.image).slice(0, 3);
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const TOPIC: Record<string, { e: string; img: ImageMetadata }> = {
+  workouts: { e: '🏋️', img: TOOL_IMG.squat }, nutrition: { e: '🥗', img: TOOL_IMG.salmonBowl }, 'diet-plans': { e: '🍛', img: TOOL_IMG.curry },
+  'weight-loss': { e: '🔥', img: TOOL_IMG.runner }, 'muscle-building': { e: '💪', img: TOOL_IMG.barbell }, 'healthy-recipes': { e: '🍳', img: TOOL_IMG.plates },
+  supplements: { e: '🥤', img: TOOL_IMG.shake }, 'lifestyle-recovery': { e: '🧘', img: TOOL_IMG.yoga },
+};
+const searchIndex = all.map((p) => ({ t: p.title, e: p.excerpt, c: p.category.name, s: p.slug, d: p.date.toISOString().slice(0, 10), r: p.readingTime }));
+const chips = categories.slice(0, 4).map((c) => `${TOPIC[c.slug]?.e ?? '📌'} ${c.name}`);
+---
+<!-- ───────── Hero ───────── -->
+<section class="relative overflow-hidden bg-night pb-0 pt-10 text-ink md:pt-14">
+  <div class="pointer-events-none absolute -left-40 top-0 h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.16),transparent_65%)]" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(rgb(244 245 247) 1px, transparent 1px); background-size: 28px 28px;" aria-hidden="true"></div>
+  <div class="container-pf relative grid items-center gap-12 pb-12 lg:grid-cols-12 lg:pb-20">
+    <div class="lg:col-span-6">
+      <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">Blog</li></ol></nav>
+      <p class="mb-5 inline-flex items-center gap-2 rounded-pill border border-white/15 bg-white/5 px-3.5 py-1.5 text-sm">📰 The PeriodicFit Journal</p>
+      <h1 data-fx="words" class="font-display text-[clamp(2.7rem,6.5vw,6rem)] font-bold leading-[0.93] tracking-[-0.04em]">Train smarter. <span class="text-primary">Eat better.</span></h1>
+      <p class="mt-6 max-w-lg text-lg text-ink/75">Practical, science-backed guides on training, nutrition and recovery, written by coaches and dietitians. No fads, no fluff.</p>
+      <label class="relative mt-8 block max-w-md">
+        <span class="sr-only">Search articles</span>
+        <input id="blog-search" type="search" placeholder="Search protein, fat loss, meal prep…" autocomplete="off" class="w-full rounded-pill border border-white/15 bg-white/5 py-4 pl-12 pr-4 text-ink placeholder:text-muted focus:border-primary focus:outline-none" />
+        <Icon name="search" size={18} class="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted" />
+      </label>
+      <ul class="mt-6 flex flex-wrap gap-2 text-sm text-ink/80">
+        <li class="rounded-pill bg-white/5 px-3 py-1.5">✍️ {all.length} articles</li>
+        <li class="rounded-pill bg-white/5 px-3 py-1.5">🗂️ {categories.length} topics</li>
+        <li class="rounded-pill bg-white/5 px-3 py-1.5">🔬 Science-backed</li>
+      </ul>
+    </div>
+
+    <!-- 3D stack of post covers -->
+    <div class="relative mx-auto h-[340px] w-full max-w-[520px] sm:h-[440px] lg:col-span-6 lg:h-[540px]" data-fx="stack" style="perspective: 1200px;">
+      {stackImgs[0] && (
+        <a href={`/blog/${stackImgs[0].slug}`} data-depth="0.6" class="group absolute left-[12%] top-0 block h-[78%] w-[68%] overflow-hidden rounded-[28px] shadow-2xl shadow-black/60 ring-1 ring-white/10">
+          <PostImage image={stackImgs[0].image!} eager sizes="360px" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          <span class="absolute inset-0 bg-gradient-to-b from-night via-night/30 to-transparent"></span>
+          <span class="absolute inset-x-0 top-0 p-5"><span class="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Latest</span><span class="mt-1 block font-display text-xl font-bold leading-tight md:text-2xl">{stackImgs[0].title}</span></span>
+        </a>
+      )}
+      {stackImgs[1] && (
+        <a href={`/blog/${stackImgs[1].slug}`} data-depth="1.2" class="absolute bottom-[4%] left-0 block h-[40%] w-[42%] -rotate-6 overflow-hidden rounded-[22px] border-4 border-night shadow-2xl shadow-black/60" aria-label={stackImgs[1].title}>
+          <PostImage image={stackImgs[1].image!} sizes="220px" class="h-full w-full object-cover" />
+        </a>
+      )}
+      {stackImgs[2] && (
+        <a href={`/blog/${stackImgs[2].slug}`} data-depth="1.6" class="absolute bottom-[12%] right-0 block h-[36%] w-[36%] rotate-[7deg] overflow-hidden rounded-[22px] border-4 border-night shadow-2xl shadow-black/60" aria-label={stackImgs[2].title}>
+          <PostImage image={stackImgs[2].image!} sizes="190px" class="h-full w-full object-cover" />
+        </a>
+      )}
+      {chips.map((c, i) => (
+        <span data-depth={String(1.9 + i * 0.3)} class:list={['chip-glass absolute z-10 text-xs md:text-sm', ['right-[2%] top-[6%]', 'left-[-2%] top-[34%]', 'right-[-2%] top-[52%]', 'left-[30%] bottom-[-2%]'][i]]} aria-hidden="true">{c}</span>
+      ))}
+    </div>
+  </div>
+  <div class="overflow-hidden border-t border-white/10 py-4" aria-hidden="true">
+    <p data-fx="label" class="select-none whitespace-nowrap font-display text-[18vw] font-bold leading-[0.85] tracking-[-0.05em] text-transparent md:text-[10vw]" style="-webkit-text-stroke:1px rgb(198 255 61 / 0.35)">Journal ✦ Workouts ✦ Nutrition ✦ Recovery ✦ Journal ✦</p>
+  </div>
+</section>
+
+<!-- ───────── Search results (client side) ───────── -->
+<section id="search-results" class="bg-paper py-12" hidden>
+  <div class="container-pf">
+    <p class="mb-6 text-sm text-text-muted" aria-live="polite"><span id="search-count">0</span> results</p>
+    <ul id="search-list" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></ul>
+  </div>
+</section>
+
+<div id="listing">
+  <!-- ───────── Topics bento ───────── -->
+  <section class="bg-paper py-16 md:py-24">
+    <div class="container-pf">
+      <div class="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="mb-3 font-display text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">(Explore by topic)</p>
+          <h2 data-fx="words" class="font-display text-[clamp(2rem,4.5vw,3.75rem)] font-bold leading-[1] tracking-[-0.03em] text-text">Pick what you need today.</h2>
+        </div>
+      </div>
+      <ul class="grid grid-cols-2 gap-3 md:grid-cols-4" data-fx="rise">
+        {categories.map((c, i) => {
+          const t = TOPIC[c.slug];
+          return (
+            <li data-fx-item>
+              <a href={`/blog/category/${c.slug}`} data-fx="tilt" data-speed={String([0.1, 0.35, 0.2, 0.45][i % 4])} class="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[22px] md:aspect-[5/6]">
+                {t && <Image src={t.img} alt="" widths={[300, 500]} sizes="(min-width: 768px) 25vw, 50vw" quality={60} class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110" />}
+                <span class="absolute inset-0 bg-gradient-to-t from-night via-night/45 to-night/5"></span>
+                <span class="chip-glass absolute right-3 top-3 text-xs">{c.count} {c.count === 1 ? 'article' : 'articles'}</span>
+                <span class="relative p-4 text-ink md:p-5">
+                  <span class="block text-3xl transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110 md:text-4xl">{t?.e ?? '📌'}</span>
+                  <span class="mt-2 block font-display text-lg font-bold leading-tight md:text-xl">{c.name}</span>
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ───────── Editor's pick ───────── -->
+  {featured && (
+    <section class="bg-paper-2 py-16 md:py-24">
+      <div class="container-pf grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
+        <a href={`/blog/${featured.slug}`} class="block aspect-[4/3] overflow-hidden rounded-[28px] lg:col-span-7" data-fx="clip">
+          {featured.image && <PostImage image={featured.image} sizes="(min-width: 1024px) 55vw, 100vw" class="h-full w-full object-cover" />}
+        </a>
+        <div class="lg:col-span-5">
+          <p class="mb-4 inline-flex items-center gap-2 rounded-pill bg-night px-3 py-1 text-xs font-semibold text-primary">⭐ Editor's pick · {featured.category.name}</p>
+          <h2 class="font-display text-[clamp(1.9rem,3.6vw,3rem)] font-bold leading-[1.05] tracking-[-0.03em] text-text"><a href={`/blog/${featured.slug}`} class="hover:underline hover:decoration-primary hover:decoration-[4px] hover:underline-offset-8">{featured.title}</a></h2>
+          <p class="mt-4 text-lg text-text-muted">{featured.excerpt}</p>
+          <p class="mt-5 text-sm text-text-muted">{featured.author.name} · {fmt(featured.date)} · {featured.readingTime} min read</p>
+          <a href={`/blog/${featured.slug}`} class="btn mt-7 bg-night text-primary hover:bg-black">Read the article <Icon name="arrow-right" size={16} /></a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ───────── Latest ───────── -->
+  <section class="bg-paper py-16 md:py-24">
+    <div class="container-pf">
+      <div class="mb-10 flex items-end justify-between gap-4">
+        <div>
+          <p class="mb-3 font-display text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">(Latest)</p>
+          <h2 data-fx="words" class="font-display text-[clamp(2rem,4.5vw,3.75rem)] font-bold leading-[1] tracking-[-0.03em] text-text">Fresh from the coaches.</h2>
+        </div>
+        <a href="/rss.xml" class="hidden rounded-pill border border-[#D9DCE1] px-4 py-2 text-sm font-medium text-text hover:border-text md:inline-flex">RSS feed</a>
+      </div>
+      {rest.length === 0 && featured && <p class="text-text-muted">More articles are on the way. ✍️</p>}
+      <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-fx="rise">
+        {rest.map((p, i) => <li data-fx-item><div data-speed={String([0, 0.3, 0.15][i % 3])} class="h-full"><PostCard post={p} /></div></li>)}
+      </ul>
+      {page.last > 1 && (
+        <nav aria-label="Pagination" class="mt-12 flex items-center justify-center gap-2">
+          {Array.from({ length: page.last }, (_, i) => i + 1).map((n) => (
+            <a href={n === 1 ? '/blog' : `/blog/page/${n}`} aria-current={n === page.current ? 'page' : undefined} class:list={['grid h-10 w-10 place-items-center rounded-full text-sm font-semibold', n === page.current ? 'bg-night text-primary' : 'border border-[#D9DCE1] text-text hover:border-text']}>{n}</a>
+          ))}
+          <a href="/blog/page/2" rel="next" class="rounded-pill border border-[#D9DCE1] px-4 py-2 text-sm text-text hover:border-text">Older →</a>
+        </nav>
+      )}
+    </div>
+  </section>
+</div>
+
+<!-- ───────── CTA ───────── -->
+<section class="relative overflow-hidden bg-night py-24 text-ink md:py-32">
+  <div class="pointer-events-none absolute inset-0" data-fx="stickers" aria-hidden="true">
+    {[['📚', 'left-[4%] top-[3%] text-3xl md:left-[6%] md:top-[14%] md:text-5xl', 1.2], ['🥗', 'right-[4%] top-[3%] text-3xl md:right-[8%] md:top-[12%] md:text-5xl', 0.9], ['💪', 'left-[6%] bottom-[2%] text-3xl md:left-[12%] md:bottom-[10%] md:text-4xl', 1.5], ['🔥', 'right-[6%] bottom-[2%] text-3xl md:right-[12%] md:bottom-[14%] md:text-5xl', 1.1]].map(([e, cls, d]) => <span data-fx-item data-depth={d} class:list={['absolute', cls]}>{e}</span>)}
+  </div>
+  <div class="container-pf relative text-center">
+    <h2 data-fx="words" class="mx-auto max-w-3xl font-display text-[clamp(2.2rem,5.5vw,4.75rem)] font-bold leading-[0.98] tracking-[-0.03em]">Reading is step one. <span class="text-primary">Let's build your plan.</span></h2>
+    <p class="mx-auto mt-5 max-w-md text-lg text-ink/75">A coach turns what you learn into a plan for your body, food and schedule. First call is free.</p>
+    <div class="mt-9 flex flex-wrap justify-center gap-3">
+      <button type="button" data-open-inquiry class="btn-primary px-8 py-4 text-base">Book Free Consultation <Icon name="arrow-right" size={18} /></button>
+      <a href="/tools" class="btn border border-ink/25 px-8 py-4 text-base text-ink hover:border-primary hover:text-primary">Try free tools</a>
+    </div>
+  </div>
+</section>
+
+<script type="application/json" id="search-index" set:html={JSON.stringify(searchIndex)} />
+<script>
+  import { initFx } from '../../scripts/fx';
+  initFx();
+  const input = document.getElementById('blog-search') as HTMLInputElement | null;
+  const index = JSON.parse(document.getElementById('search-index')?.textContent || '[]') as { t: string; e: string; c: string; s: string; d: string; r: number }[];
+  const results = document.getElementById('search-results')!;
+  const listing = document.getElementById('listing')!;
+  const list = document.getElementById('search-list')!;
+  const count = document.getElementById('search-count')!;
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  input?.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (q.length < 2) { results.hidden = true; listing.hidden = false; return; }
+    const words = q.split(/\s+/);
+    const hits = index.filter((p) => words.every((w) => `${p.t} ${p.e} ${p.c}`.toLowerCase().includes(w)));
+    count.textContent = String(hits.length);
+    list.innerHTML = hits.map((p) => `<li><a href="/blog/${encodeURIComponent(p.s)}" class="block h-full rounded-[22px] border border-[#E6E8EC] bg-white p-5 hover:shadow-lg"><span class="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">${esc(p.c)}</span><span class="mt-2 block font-display text-lg font-bold text-text">${esc(p.t)}</span><span class="mt-2 block text-sm text-text-muted">${esc(p.e)}</span><span class="mt-3 block text-xs text-text-muted">${esc(p.d)} · ${p.r} min read</span></a></li>`).join('') || '<li class="text-text-muted">No articles found. Try another word.</li>';
+    results.hidden = false; listing.hidden = true;
+  });
+</script>

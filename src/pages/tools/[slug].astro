@@ -1,0 +1,219 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import TunnelHero, { type TunnelLayer } from '../../components/fx/TunnelHero.astro';
+import Ribbons from '../../components/fx/Ribbons.astro';
+import { TOOL_MEDIA, TOOL_IMG } from '../../data/toolMedia';
+import ShareResult from '../../components/tools/ShareResult.astro';
+import FAQ from '../../components/FAQ.astro';
+import Icon from '../../components/Icon.astro';
+import CalorieTool from '../../components/tools/CalorieTool.astro';
+import MacroTool from '../../components/tools/MacroTool.astro';
+import ProteinTool from '../../components/tools/ProteinTool.astro';
+import BmiTool from '../../components/tools/BmiTool.astro';
+import BodyFatTool from '../../components/tools/BodyFatTool.astro';
+import IdealWeightTool from '../../components/tools/IdealWeightTool.astro';
+import WaterTool from '../../components/tools/WaterTool.astro';
+import OneRepMaxTool from '../../components/tools/OneRepMaxTool.astro';
+import TimelineTool from '../../components/tools/TimelineTool.astro';
+import MealPlanTool from '../../components/tools/MealPlanTool.astro';
+import SplitTool from '../../components/tools/SplitTool.astro';
+import QuizTool from '../../components/tools/QuizTool.astro';
+import { TOOLS, SERVICES, SITE } from '../../config/site';
+import { SERVICE_GALLERY } from '../../data/images';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('tools');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const tool = TOOLS.find((t) => t.slug === entry.id)!;
+const service = SERVICES.find((s) => s.slug === d.service)!;
+const related = d.related.map((slug) => TOOLS.find((t) => t.slug === slug)!).filter(Boolean);
+const ctaImage = SERVICE_GALLERY[d.service][1];
+
+const COMPONENTS: Record<string, any> = {
+  'calorie-calculator': CalorieTool, 'macro-calculator': MacroTool, 'protein-intake-calculator': ProteinTool,
+  'bmi-calculator': BmiTool, 'body-fat-calculator': BodyFatTool, 'ideal-weight-calculator': IdealWeightTool,
+  'water-intake-calculator': WaterTool, 'one-rep-max-calculator': OneRepMaxTool, 'transformation-timeline': TimelineTool,
+  'meal-plan-generator': MealPlanTool, 'workout-split-builder': SplitTool, 'fitness-personality-quiz': QuizTool,
+};
+const GLYPHS: Record<string, string[]> = {
+  'calorie-calculator': ['kcal', 'TDEE', '2,400', 'BMR'], 'macro-calculator': ['P', 'C', 'F', 'g'], 'protein-intake-calculator': ['g', 'P', '1.8', 'kg'],
+  'bmi-calculator': ['BMI', '24.9', 'kg', 'm²'], 'body-fat-calculator': ['%', 'cm', 'BF', 'lean'], 'ideal-weight-calculator': ['kg', 'lb', 'ft', '5′9″'],
+  'water-intake-calculator': ['L', 'H₂O', 'ml', '2.5'], 'one-rep-max-calculator': ['1RM', 'kg', '×5', '%'], 'transformation-timeline': ['12w', 'goal', 'kg', '→'],
+  'meal-plan-generator': ['kcal', 'veg', 'dal', 'g'], 'workout-split-builder': ['PPL', 'sets', 'reps', '×4'], 'fitness-personality-quiz': ['?', 'you', '6Q', '!'],
+};
+const Tool = COMPONENTS[entry.id];
+const signature = tool.group === 'signature';
+const url = `${SITE.url}/tools/${entry.id}`;
+const media = TOOL_MEDIA[entry.id];
+
+// Fly-through hero layers: the tool's own photos + 2 extra, emoji chips and outlined units.
+const POOL = [TOOL_IMG.fruits, TOOL_IMG.barbell, TOOL_IMG.waterGlass, TOOL_IMG.greens, TOOL_IMG.runner, TOOL_IMG.plank, TOOL_IMG.eggs, TOOL_IMG.press];
+const idx = TOOLS.findIndex((t) => t.slug === entry.id);
+const extra = [POOL[idx % POOL.length]];
+const glyphs = GLYPHS[entry.id] ?? ['kg', '%'];
+const layers: TunnelLayer[] = [
+  { kind: 'img', img: media.images[0].src, x: 13, y: 24, mx: 16, my: 11, z: -260, w: 'h-36 w-28 md:h-64 md:w-48', rot: -6 },
+  { kind: 'img', img: media.images[1].src, x: 87, y: 24, mx: 84, my: 12, z: -620, w: 'h-32 w-28 md:h-52 md:w-44', rot: 7 },
+  { kind: 'img', img: media.images[2].src, x: 11, y: 80, mx: 20, my: 89, z: -900, w: 'h-28 w-32 md:h-44 md:w-52', rot: 4 },
+  { kind: 'img', img: extra[0], x: 88, y: 80, mx: 82, my: 89, z: -420, w: 'h-28 w-24 md:h-48 md:w-40', rot: -5 },
+  { kind: 'chip', text: media.chips[0], x: 7, y: 52, z: -160, rot: -4 },
+  { kind: 'chip', text: media.chips[1], x: 93, y: 52, mx: 50, my: 28, z: -380, rot: 4 },
+  { kind: 'chip', text: media.chips[2] ?? media.sample, x: 30, y: 92, z: -560, rot: -2 },
+  { kind: 'chip', text: media.sample, x: 70, y: 92, mx: 50, my: 95, z: -240, rot: 3 },
+  { kind: 'glyph', text: glyphs[0], x: 24, y: 30, z: -1700 },
+  { kind: 'glyph', text: glyphs[1] ?? glyphs[0], x: 78, y: 70, z: -1500 },
+];
+
+const appLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: tool.name,
+  url,
+  description: d.description,
+  applicationCategory: 'HealthApplication',
+  operatingSystem: 'Any',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Free tools', item: `${SITE.url}/tools` },
+    { '@type': 'ListItem', position: 3, name: tool.name, item: url },
+  ],
+};
+---
+<MarketingLayout title={d.title} description={d.description} service={d.service} transparentHeader={true}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(appLd)} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+
+  <TunnelHero layers={layers}>
+    <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted">
+      <ol class="flex flex-wrap items-center justify-center gap-1.5">
+        <li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li>
+        <li><a href="/tools" class="hover:text-primary">Free tools</a></li><li aria-hidden="true">/</li>
+        <li aria-current="page" class="text-ink/80">{tool.name}</li>
+      </ol>
+    </nav>
+    <p class="mb-5 inline-flex items-center gap-2 rounded-pill border border-white/15 bg-night/70 px-3.5 py-1.5 text-sm">
+      <span class="grid h-6 w-6 place-items-center rounded-full bg-primary text-night"><Icon name={tool.icon} size={13} strokeWidth={2.4} /></span>
+      {signature ? 'Signature tool · free · shareable' : 'Free calculator · instant'}
+    </p>
+    <h1 class="max-w-[16ch] font-display text-[clamp(2.4rem,7vw,6rem)] font-bold leading-[0.95] tracking-[-0.035em] [text-shadow:0_10px_40px_rgb(14_15_18/0.9)]">{d.h1}</h1>
+    <p class="mt-5 max-w-xl text-base text-ink/80 md:text-lg [text-shadow:0_4px_20px_rgb(14_15_18/0.95)]">{d.intro}</p>
+    <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+      <a href="#tool" data-fx="magnetic" class="btn-primary">Start now <Icon name="arrow-down" size={16} /></a>
+      <span class="inline-flex items-center gap-2 rounded-pill bg-night/70 px-3 py-1.5 text-sm text-muted"><Icon name="shield-check" size={16} class="text-primary" /> No sign-up</span>
+    </div>
+  </TunnelHero>
+
+  <div class="relative">
+  <div class="overflow-hidden pt-4" aria-hidden="true">
+    <p data-fx="label" class="pointer-events-none select-none whitespace-nowrap font-display text-[18vw] font-bold leading-[0.9] tracking-[-0.05em] text-transparent md:text-[10vw]" style="-webkit-text-stroke: 1px rgb(198 255 61 / 0.35);">{tool.name} ✦ {tool.name} ✦</p>
+  </div>
+  <div id="tool" class="container-pf relative z-10 scroll-mt-24 pb-4 pt-6" data-tool={entry.id}>
+    <div class="tool-rise"><Tool /></div>
+    <div class="tool-rise mt-5"><ShareResult /></div>
+  </div>
+  </div>
+
+  <Ribbons items={media.facts} />
+
+  <!-- Guide -->
+  <section class="tool-guide relative isolate overflow-hidden border-t border-line py-20 md:py-28">
+    <div data-orb="1" class="pointer-events-none absolute -left-32 top-20 -z-10 h-80 w-80 rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.12),transparent_70%)]" aria-hidden="true"></div>
+    <div data-orb="1.6" class="pointer-events-none absolute -right-24 top-1/2 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgb(255_107_44/0.10),transparent_70%)]" aria-hidden="true"></div>
+    <div class="container-pf grid gap-12 lg:grid-cols-12">
+      <aside class="lg:col-span-4">
+        <div class="lg:sticky lg:top-28">
+          <p class="eyebrow mb-4">(The guide)</p>
+          <p class="font-display text-3xl font-bold leading-tight tracking-tight md:text-4xl">Understand your number.</p>
+          <p class="mt-4 text-sm text-muted">Updated {d.updated.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} · Reviewed by the PeriodicFit team {/* TODO: add named expert reviewer */}</p>
+          <div class="mt-8 hidden h-1 overflow-hidden rounded bg-line lg:block" aria-hidden="true"><div class="guide-progress h-full origin-left scale-x-0 bg-primary"></div></div>
+          <div class="mt-8 hidden aspect-[4/5] overflow-hidden rounded-[28px] lg:block" data-fx="clip">
+            <Image src={media.images[2].src} alt={media.images[2].alt} widths={[400, 700]} sizes="30vw" quality={68} class="h-full w-full object-cover" />
+          </div>
+          <ul class="mt-6 hidden space-y-2 lg:block">
+            {media.facts.map((f) => <li class="flex gap-3 rounded-2xl border border-line bg-surface p-3 text-sm text-ink/80"><span class="text-xl">{f.e}</span>{f.t}</li>)}
+          </ul>
+        </div>
+      </aside>
+      <article class="guide-body prose-pf lg:col-span-8 [&>h2:first-child]:mt-0">
+        <Content />
+      </article>
+    </div>
+  </section>
+
+  <FAQ items={d.faq} heading={`${tool.name}: FAQ`} id="tool-faq" />
+
+  <!-- Related tools -->
+  <section class="relative py-20 md:py-28">
+    <div class="container-pf">
+      <div class="mb-10 flex items-end justify-between gap-6">
+        <div>
+          <p class="eyebrow mb-4">(Keep going)</p>
+          <h2 class="font-display text-[clamp(2rem,4.5vw,3.5rem)] font-bold leading-none tracking-[-0.03em]">Try these next.</h2>
+        </div>
+        <a href="/tools" class="btn-secondary hidden md:inline-flex">All tools <Icon name="arrow-right" size={16} /></a>
+      </div>
+      <ul class="grid gap-4 md:grid-cols-3" data-fx="rise">
+        {related.map((t, ri) => {
+          const m = TOOL_MEDIA[t.slug];
+          return (
+            <li data-fx-item>
+              <a href={`/tools/${t.slug}`} data-fx="tilt" data-speed={String([0.2, 0.7, 0.4][ri % 3])} class="group relative flex h-full flex-col overflow-hidden rounded-[24px] border border-line bg-surface transition-colors hover:border-primary/60">
+                <div class="relative aspect-[16/10] overflow-hidden">
+                  <Image src={m.images[0].src} alt="" widths={[400, 700]} sizes="(min-width: 768px) 33vw, 100vw" quality={65} class="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-110" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent"></div>
+                  <span class="chip-glass absolute left-4 top-4 text-xs">{m.sample}</span>
+                  <span class="absolute bottom-0 left-5 grid h-12 w-12 translate-y-1/2 place-items-center rounded-2xl bg-primary text-night transition-transform duration-500 ease-out-expo group-hover:-rotate-12"><Icon name={t.icon} size={22} /></span>
+                </div>
+                <div class="flex flex-1 flex-col p-6 pt-9">
+                  <span class="font-display text-xl font-bold">{t.name}</span>
+                  <span class="mt-2 text-sm text-muted">{t.blurb}</span>
+                  <span class="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-primary">Open tool <Icon name="arrow-up-right" size={14} /></span>
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Service CTA with parallax image -->
+  <section class="tool-cta relative overflow-hidden py-24 md:py-36">
+    <div class="cta-media absolute inset-x-0 -inset-y-[20%]" aria-hidden="true">
+      <Image src={ctaImage.src} alt="" widths={[800, 1600]} sizes="100vw" quality={60} class="h-full w-full object-cover opacity-35" />
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-night via-night/50 to-night" aria-hidden="true"></div>
+    <div class="container-pf relative text-center">
+      <p class="eyebrow mb-4">(Go beyond the numbers)</p>
+      <h2 class="mx-auto max-w-4xl font-display text-[clamp(2.2rem,5.5vw,4.75rem)] font-bold leading-[0.98] tracking-[-0.03em]">A calculator gives you a number. <span class="text-primary">A coach gets you results.</span></h2>
+      <p class="mx-auto mt-6 max-w-xl text-lg text-ink/75">Turn your result into a plan built around your life with our {service.name.toLowerCase()}.</p>
+      <div class="mt-9 flex flex-wrap justify-center gap-3">
+        <a href="/contact" data-open-inquiry data-service={service.slug} class="btn-primary px-8 py-4 text-base">Book Free Consultation <Icon name="arrow-right" size={18} /></a>
+        <a href={`/services/${service.slug}`} class="btn-secondary px-8 py-4 text-base">Explore {service.short}</a>
+      </div>
+    </div>
+  </section>
+</MarketingLayout>
+
+<script>
+  import { initShare } from '../../scripts/tools/share';
+  import { initFx } from '../../scripts/fx';
+  import '../../scripts/tools-page';
+  initFx();
+  const root = document.querySelector<HTMLElement>('[data-tool]');
+  if (root) initShare(root);
+</script>

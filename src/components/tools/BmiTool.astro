@@ -1,0 +1,54 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs fields={['height', 'weight']} />
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Your BMI</p>
+    <div class="mt-1 flex items-end justify-between gap-3">
+      <span class="t-result-num text-7xl" data-out="bmi">0</span>
+      <span class="mb-2 rounded-pill bg-primary/15 px-3 py-1 text-sm font-semibold text-primary" data-out="cat">–</span>
+    </div>
+    <div class="relative mt-6" aria-hidden="true">
+      <div class="flex h-3 overflow-hidden rounded-full">
+        <span class="bg-sky-300" style="width:14%"></span><span class="bg-primary" style="width:26%"></span><span class="bg-amber-300" style="width:20%"></span><span class="bg-accent" style="width:40%"></span>
+      </div>
+      <span class="absolute -top-1.5 h-6 w-2 -translate-x-1/2 rounded-full bg-white shadow-[0_0_0_4px_rgb(14_15_18/0.6)] transition-[left] duration-700 ease-out-expo" data-out="marker" style="left:34%"></span>
+      <div class="mt-2 flex justify-between text-xs text-muted"><span>15</span><span>18.5</span><span>25</span><span>30</span><span>40</span></div>
+    </div>
+    <dl class="mt-6 grid grid-cols-2 gap-3">
+      <div class="t-stat"><dt>Healthy weight for your height</dt><dd data-out="range">–</dd></div>
+      <div class="t-stat"><dt>BMI Prime</dt><dd data-out="prime">–</dd></div>
+    </dl>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bodyMetrics, wireTool, emitResult, shareUrl, countTo, round, fmt } from '../../scripts/tools/common';
+  import { bmiCategory } from '../../scripts/tools/bmi';
+  const root = document.querySelector<HTMLElement>('[data-tool="bmi-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    wireTool(form, () => {
+      const { cm, kg, unit } = bodyMetrics(form);
+      if (!(cm > 100 && kg > 25)) return;
+      const m = cm / 100; const bmi = kg / (m * m);
+      const { label } = bmiCategory(bmi);
+      countTo(root.querySelector('[data-out="bmi"]'), round(bmi, 1), 1);
+      root.querySelector('[data-out="cat"]')!.textContent = label;
+      root.querySelector<HTMLElement>('[data-out="marker"]')!.style.left = `${Math.min(100, Math.max(0, (bmi - 15) / 25 * 100))}%`;
+      const lo = 18.5 * m * m, hi = 24.9 * m * m;
+      root.querySelector('[data-out="range"]')!.textContent = unit === 'imperial' ? `${fmt(lo * 2.20462)}–${fmt(hi * 2.20462)} lb` : `${fmt(lo, 1)}–${fmt(hi, 1)} kg`;
+      root.querySelector('[data-out="prime"]')!.textContent = (bmi / 25).toFixed(2);
+      emitResult(form, {
+        tool: 'BMI Calculator', kicker: 'My BMI check', hero: bmi.toFixed(1), heroUnit: label,
+        stats: [{ label: 'Healthy range', value: unit === 'imperial' ? `${fmt(lo * 2.20462)}–${fmt(hi * 2.20462)} lb` : `${fmt(lo)}–${fmt(hi)} kg` }, { label: 'BMI Prime', value: (bmi / 25).toFixed(2) }],
+        shareText: 'Just checked my BMI with PeriodicFit. Check yours in 10 seconds:',
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

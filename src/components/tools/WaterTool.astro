@@ -1,0 +1,59 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+---
+<ToolFrame>
+  <Fragment slot="form">
+    <BodyInputs fields={['weight']} />
+    <label class="t-field mt-3"><span class="t-label">Exercise per day</span><span class="t-input"><input type="number" name="mins" inputmode="numeric" min="0" max="300" step="5" value="45" /><em>min</em></span></label>
+    <div class="mt-4">
+      <span class="t-label">Climate</span>
+      <fieldset class="t-seg mt-2" aria-label="Climate">
+        <label><input type="radio" name="climate" value="mild" checked /><span>Mild</span></label>
+        <label><input type="radio" name="climate" value="hot" /><span>Hot / humid</span></label>
+      </fieldset>
+    </div>
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Daily fluid target</p>
+    <p class="mt-1 flex items-baseline gap-2"><span class="t-result-num text-7xl" data-out="l">0</span><span class="text-muted">litres</span></p>
+    <p class="mt-2 text-sm text-muted">≈ <span data-out="glasses">0</span> glasses of 250 ml</p>
+    <div class="mt-6 grid grid-cols-8 gap-2" data-out="cups" aria-hidden="true"></div>
+    <dl class="mt-6 grid grid-cols-3 gap-2">
+      <div class="t-stat"><dt>Base</dt><dd class="!text-lg" data-out="base">–</dd></div>
+      <div class="t-stat"><dt>Exercise</dt><dd class="!text-lg" data-out="ex">–</dd></div>
+      <div class="t-stat"><dt>Climate</dt><dd class="!text-lg" data-out="cl">–</dd></div>
+    </dl>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bodyMetrics, num, str, wireTool, emitResult, shareUrl, countTo, round, fmt } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="water-intake-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    wireTool(form, () => {
+      const { kg } = bodyMetrics(form);
+      if (!(kg > 25)) return;
+      const base = kg * 0.033;                                  // ~33 ml per kg body weight
+      const ex = Math.max(0, num(form, 'mins') || 0) / 30 * 0.35; // ~350 ml per 30 min of exercise
+      const cl = str(form, 'climate') === 'hot' ? 0.5 : 0;
+      const total = base + ex + cl;
+      const glasses = Math.round(total / 0.25);
+      countTo(root.querySelector('[data-out="l"]'), round(total, 1), 1);
+      root.querySelector('[data-out="glasses"]')!.textContent = String(glasses);
+      root.querySelector('[data-out="base"]')!.textContent = `${fmt(base, 1)} L`;
+      root.querySelector('[data-out="ex"]')!.textContent = `${fmt(ex, 1)} L`;
+      root.querySelector('[data-out="cl"]')!.textContent = `${fmt(cl, 1)} L`;
+      const cups = Math.min(24, glasses);
+      root.querySelector('[data-out="cups"]')!.innerHTML = Array.from({ length: Math.max(cups, 8) }, (_, i) =>
+        `<span class="h-9 rounded-b-lg rounded-t-sm border ${i < cups ? 'border-sky-300/60 bg-sky-300/30' : 'border-line'}" style="transition: background-color .4s ${i * 25}ms"></span>`).join('');
+      emitResult(form, {
+        tool: 'Water Intake', kicker: 'My daily water goal', hero: `${total.toFixed(1)} L`, heroUnit: `≈ ${glasses} glasses a day`,
+        stats: [{ label: 'Base', value: `${fmt(base, 1)} L` }, { label: 'Training', value: `${fmt(ex, 1)} L` }, { label: 'Climate', value: `${fmt(cl, 1)} L` }],
+        shareText: `My daily water goal is ${total.toFixed(1)} L. Are you drinking enough?`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

@@ -1,0 +1,118 @@
+---
+/**
+ * Inquiry form → Web3Forms. Used inline on service pages and inside InquiryModal.
+ * Logic: src/scripts/inquiry.ts. Every instance needs a unique `id`.
+ */
+import Icon from './Icon.astro';
+import { SERVICES, FORMS } from '../config/site';
+
+interface Props { id: string; service?: string; compact?: boolean }
+const { id, service = '', compact = false } = Astro.props;
+const f = (name: string) => `${id}-${name}`;
+const goals = ['Weight loss', 'Muscle gain', 'Get fit', 'Better diet', 'Other'];
+const ages = ['Under 18', '18–24', '25–34', '35–44', '45–54', '55+'];
+---
+<form class="inquiry-form" data-inquiry-form novalidate data-key={FORMS.web3formsKey} data-turnstile={FORMS.turnstileSiteKey}>
+  <!-- Hidden context fields -->
+  <input type="hidden" name="page_url" value="" />
+  <input type="hidden" name="service_slug" value={service} />
+  <input type="hidden" name="utm_source" value="" />
+  <input type="hidden" name="utm_medium" value="" />
+  <input type="hidden" name="utm_campaign" value="" />
+  <!-- Honeypot: humans never see or fill this -->
+  <input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+  <div class:list={['grid gap-4', !compact && 'sm:grid-cols-2']}>
+    <div class="iq-field">
+      <label for={f('name')}>Full name <span aria-hidden="true">*</span></label>
+      <input id={f('name')} name="name" type="text" autocomplete="name" required placeholder="Your name" />
+    </div>
+    <div class="iq-field">
+      <label for={f('email')}>Email <span aria-hidden="true">*</span></label>
+      <input id={f('email')} name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+    </div>
+    <div class="iq-field">
+      <label for={f('phone')}>Phone / WhatsApp <span aria-hidden="true">*</span></label>
+      <input id={f('phone')} name="phone" type="tel" autocomplete="tel" required placeholder="+91 98765 43210" pattern="^\+?[0-9\s\-()]{7,20}$" />
+    </div>
+    <div class="iq-field">
+      <label for={f('service')}>Service</label>
+      <select id={f('service')} name="service">
+        <option value="">Not sure yet</option>
+        {SERVICES.map((s) => <option value={s.slug} selected={s.slug === service}>{s.name}</option>)}
+      </select>
+    </div>
+    <div class="iq-field">
+      <label for={f('goal')}>Main goal</label>
+      <select id={f('goal')} name="goal">
+        {goals.map((g) => <option>{g}</option>)}
+      </select>
+    </div>
+    <div class="iq-field">
+      <label for={f('age')}>Age range</label>
+      <select id={f('age')} name="age_range">
+        <option value="">Prefer not to say</option>
+        {ages.map((a) => <option>{a}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <fieldset class="mt-4">
+    <legend class="iq-legend">Preferred contact</legend>
+    <div class="mt-2 flex flex-wrap gap-2">
+      {['WhatsApp', 'Call', 'Email'].map((m, i) => (
+        <label class="iq-chip">
+          <input type="radio" name="contact_method" value={m} checked={i === 0} class="peer sr-only" />
+          <span>{m}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+
+  <div class="iq-field mt-4">
+    <label for={f('message')}>Message <span class="text-muted">(optional)</span></label>
+    <textarea id={f('message')} name="message" rows={compact ? 2 : 3} placeholder="Anything we should know? Injuries, schedule, food preferences…"></textarea>
+  </div>
+
+  <label class="mt-4 flex items-start gap-3 text-sm text-ink/80">
+    <input type="checkbox" name="consent" required class="iq-check mt-0.5" />
+    <span>I agree to be contacted and accept the <a href="/privacy-policy" class="text-primary underline underline-offset-2">Privacy Policy</a>. <span aria-hidden="true">*</span></span>
+  </label>
+
+  {FORMS.turnstileSiteKey && <div class="cf-turnstile mt-4" data-sitekey={FORMS.turnstileSiteKey} data-theme="dark"></div>}
+
+  <button type="submit" class="iq-submit btn-primary mt-6 w-full py-4 text-base">
+    <span class="iq-label inline-flex items-center gap-2">Book my free consultation <Icon name="arrow-right" size={18} /></span>
+    <span class="iq-loading hidden items-center gap-2"><span class="iq-spinner"></span> Sending…</span>
+  </button>
+  <p class="iq-status mt-4 hidden rounded-xl px-4 py-3 text-sm" role="status" aria-live="polite"></p>
+  <p class="mt-3 text-center text-xs text-muted">Free call · No payment needed · Reply within 24 hours</p>
+</form>
+
+<style>
+  .iq-field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .iq-field label, .iq-legend { font-size: 0.8rem; font-weight: 500; color: rgb(244 245 247 / 0.8); }
+  .iq-field label span[aria-hidden], label span[aria-hidden] { color: var(--color-primary); }
+  .iq-field input, .iq-field select, .iq-field textarea {
+    width: 100%; border-radius: 14px; border: 1px solid var(--color-line); background: rgb(14 15 18 / 0.6);
+    padding: 0.8rem 1rem; color: var(--color-ink); font-size: 0.95rem; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .iq-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239AA0AA' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.5rem; }
+  .iq-field select option { background: #17191E; }
+  .iq-field input::placeholder, .iq-field textarea::placeholder { color: rgb(154 160 170 / 0.7); }
+  .iq-field input:focus, .iq-field select:focus, .iq-field textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgb(198 255 61 / 0.15); }
+  .iq-field [aria-invalid='true'] { border-color: #FF6B2C; }
+  .iq-chip span { display: inline-block; border-radius: 999px; border: 1px solid var(--color-line); padding: 0.45rem 1rem; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+  .iq-chip input:checked + span { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-night); font-weight: 600; }
+  .iq-chip input:focus-visible + span { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .iq-check { width: 1.1rem; height: 1.1rem; accent-color: var(--color-primary); flex-shrink: 0; }
+  .iq-spinner { width: 1rem; height: 1rem; border-radius: 999px; border: 2px solid rgb(14 15 18 / 0.3); border-top-color: var(--color-night); animation: iqspin 0.7s linear infinite; }
+  @keyframes iqspin { to { transform: rotate(360deg); } }
+  .iq-status[data-state='success'] { background: rgb(198 255 61 / 0.12); color: var(--color-primary); }
+  .iq-status[data-state='error'] { background: rgb(255 107 44 / 0.14); color: #FF9A6E; }
+</style>
+
+<script>
+  import { initInquiryForms } from '../scripts/inquiry';
+  initInquiryForms();
+</script>

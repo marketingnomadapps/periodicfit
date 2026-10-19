@@ -1,0 +1,48 @@
+---
+/** Legal / policy pages: readable prose, sticky auto-generated contents, light parallax label. */
+import MarketingLayout from './MarketingLayout.astro';
+import { LEGAL } from '../config/site';
+interface Props { title: string; description: string; label: string; intro?: string }
+const { title, description, label, intro } = Astro.props;
+const updated = new Date(LEGAL.lastUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<MarketingLayout title={title} description={description} transparentHeader={false}>
+  <section class="relative overflow-hidden pb-10 pt-12 md:pb-14 md:pt-16">
+    <div class="overflow-hidden" aria-hidden="true">
+      <p data-fx="label" class="pointer-events-none select-none whitespace-nowrap font-display text-[20vw] font-bold leading-[0.85] tracking-[-0.05em] text-transparent md:text-[11vw]" style="-webkit-text-stroke:1px rgb(198 255 61 / 0.25)">{label} ✦ {label} ✦</p>
+    </div>
+    <div class="container-pf mt-8">
+      <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">{title}</li></ol></nav>
+      <h1 data-fx="words" class="max-w-4xl font-display text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[0.95] tracking-[-0.035em]">{title}</h1>
+      <p class="mt-4 text-sm text-muted">Last updated: <time datetime={LEGAL.lastUpdated}>{updated}</time></p>
+      {intro && <p class="mt-6 max-w-2xl text-lg text-ink/75">{intro}</p>}
+    </div>
+  </section>
+  <section class="relative pb-24 md:pb-32">
+    <div class="container-pf grid gap-12 lg:grid-cols-12">
+      <aside class="lg:col-span-4">
+        <nav class="legal-toc rounded-[22px] border border-line bg-surface p-5 lg:sticky lg:top-28" aria-label="On this page">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-muted">On this page</p>
+          <ol class="space-y-1 text-sm" data-legal-toc></ol>
+        </nav>
+      </aside>
+      <div class="legal-body prose-pf lg:col-span-8 [&>h2]:scroll-mt-28">
+        <slot />
+      </div>
+    </div>
+  </section>
+</MarketingLayout>
+
+<script>
+  import { initFx } from '../scripts/fx';
+  initFx();
+  // Build the contents list from the H2s (ids added if missing)
+  const list = document.querySelector('[data-legal-toc]');
+  document.querySelectorAll<HTMLHeadingElement>('.legal-body h2').forEach((h, i) => {
+    if (!h.id) h.id = h.textContent!.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `section-${i + 1}`;
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = `#${h.id}`; a.textContent = h.textContent; a.className = 'block rounded-lg px-3 py-1.5 text-muted transition-colors hover:bg-surface-2 hover:text-primary';
+    li.append(a); list?.append(li);
+  });
+</script>

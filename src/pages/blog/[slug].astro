@@ -1,0 +1,163 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import PostImage from '../../components/blog/PostImage.astro';
+import PostCard from '../../components/blog/PostCard.astro';
+import AuthorBox from '../../components/blog/AuthorBox.astro';
+import Toc from '../../components/blog/Toc.astro';
+import ShareButtons from '../../components/blog/ShareButtons.astro';
+import AdSlot from '../../components/blog/AdSlot.astro';
+import CtaBox from '../../components/blog/CtaBox.astro';
+import { getPosts, getRelated, splitAfterParagraph, type Post } from '../../lib/posts';
+import { SITE, TOOLS } from '../../config/site';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+const { post } = Astro.props as { post: Post };
+const related = await getRelated(post, 3);
+const url = `${SITE.url}/blog/${post.slug}`;
+const [before, after] = splitAfterParagraph(post.html, 3);
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+const updatedLater = post.updated.getTime() - post.date.getTime() > 24 * 3600 * 1000;
+const ogImage = post.image ? (typeof post.image.src === 'string' ? post.image.src : post.image.src.src) : undefined;
+
+// Category → most relevant service (for the soft CTA)
+const SERVICE_FOR: Record<string, string> = {
+  workouts: 'online-personal-training', nutrition: 'diet-plans', 'diet-plans': 'diet-plans', 'weight-loss': 'weight-loss-program',
+  'muscle-building': 'muscle-gain-program', 'healthy-recipes': 'diet-plans', supplements: 'online-dietitian-consultation', 'lifestyle-recovery': 'yoga-mobility',
+};
+const TOOL_FOR: Record<string, string> = {
+  workouts: 'workout-split-builder', nutrition: 'protein-intake-calculator', 'diet-plans': 'meal-plan-generator', 'weight-loss': 'calorie-calculator',
+  'muscle-building': 'one-rep-max-calculator', 'healthy-recipes': 'meal-plan-generator', supplements: 'macro-calculator', 'lifestyle-recovery': 'water-intake-calculator',
+};
+const tool = TOOLS.find((t) => t.slug === (TOOL_FOR[post.category.slug] ?? 'calorie-calculator'))!;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  description: post.seoDescription,
+  image: ogImage ? [new URL(ogImage, SITE.url).href] : undefined,
+  datePublished: post.date.toISOString(),
+  dateModified: post.updated.toISOString(),
+  author: { '@type': 'Person', name: post.author.name, ...(post.author.credentials ? { jobTitle: post.author.credentials } : {}) },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url, logo: { '@type': 'ImageObject', url: `${SITE.url}/favicon.svg` } },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': url, ...(post.reviewer ? { reviewedBy: { '@type': 'Person', name: post.reviewer } } : {}) },
+  articleSection: post.category.name,
+  keywords: post.tags.join(', '),
+  wordCount: undefined,
+};
+const crumbLd = {
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE.url}/blog` },
+    { '@type': 'ListItem', position: 3, name: post.category.name, item: `${SITE.url}/blog/category/${post.category.slug}` },
+    { '@type': 'ListItem', position: 4, name: post.title, item: url },
+  ],
+};
+---
+<BlogLayout title={post.seoTitle} description={post.seoDescription} type="article" image={ogImage} imageAlt={post.image?.alt}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(crumbLd)} />
+  <meta slot="head" property="article:published_time" content={post.date.toISOString()} />
+  <meta slot="head" property="article:modified_time" content={post.updated.toISOString()} />
+
+  <div class="read-progress fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0 bg-primary" aria-hidden="true"></div>
+
+  <article class="bg-paper pb-16 pt-10 md:pt-14">
+    <!-- One container (max-w-6xl) for header, image and body, so every left edge lines up -->
+    <header class="container-pf max-w-6xl">
+      <nav aria-label="Breadcrumb" class="mb-6 text-xs text-text-muted">
+        <ol class="flex flex-wrap gap-1.5">
+          <li><a href="/" class="hover:text-text hover:underline">Home</a></li><li aria-hidden="true">/</li>
+          <li><a href="/blog" class="hover:text-text hover:underline">Blog</a></li><li aria-hidden="true">/</li>
+          <li><a href={`/blog/category/${post.category.slug}`} class="hover:text-text hover:underline">{post.category.name}</a></li>
+        </ol>
+      </nav>
+      <div class="max-w-3xl">
+        <div class="flex flex-wrap items-center gap-2">
+          <a href={`/blog/category/${post.category.slug}`} class="rounded-pill bg-night px-3 py-1 text-xs font-semibold text-primary">{post.category.name}</a>
+          <span class="rounded-pill bg-paper-2 px-3 py-1 text-xs font-medium text-text">⏱ {post.readingTime} min read</span>
+          {post.source === 'local' && <span class="rounded-pill bg-primary/30 px-3 py-1 text-xs font-semibold text-text">Sample article (design preview)</span>}
+        </div>
+        <h1 data-reveal class="mt-5 font-display text-[clamp(2.1rem,5vw,3.6rem)] font-bold leading-[1.06] tracking-[-0.03em] text-text">{post.title}</h1>
+        <p data-reveal class="mt-5 text-lg leading-relaxed text-text-muted md:text-xl">{post.excerpt}</p>
+        <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-[#E6E8EC] pt-5 text-sm text-text-muted">
+          <span class="flex items-center gap-2.5">
+            <span class="grid h-9 w-9 place-items-center rounded-full bg-night font-display text-xs font-bold text-primary">{post.author.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>
+            <span><span class="block font-semibold text-text">{post.author.name}</span>{post.author.credentials && <span class="block text-xs">{post.author.credentials}</span>}</span>
+          </span>
+          <span class="hidden h-6 w-px bg-[#E6E8EC] sm:block" aria-hidden="true"></span>
+          <span>Published <time datetime={post.date.toISOString()} class="font-medium text-text">{fmt(post.date)}</time></span>
+          {updatedLater && <span>Updated <time datetime={post.updated.toISOString()} class="font-medium text-text">{fmt(post.updated)}</time></span>}
+          {post.reviewer && <span class="inline-flex items-center gap-1.5 rounded-pill bg-paper-2 px-3 py-1 text-xs font-semibold text-text">✅ Reviewed by {post.reviewer}</span>}
+        </div>
+      </div>
+    </header>
+
+    {post.image && (
+      <figure class="container-pf mt-10 max-w-6xl">
+        <div class="aspect-[16/9] overflow-hidden rounded-[24px] bg-paper-2 md:aspect-[21/9]">
+          <PostImage image={post.image} eager sizes="(min-width: 1200px) 1152px, 100vw" class="h-full w-full object-cover" />
+        </div>
+      </figure>
+    )}
+
+    <div class="container-pf mt-12 grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-16">
+      <div class="min-w-0">
+        <AdSlot slot="below-title" />
+        <div class="prose-light" set:html={before} />
+        <AdSlot slot="mid-article" />
+        <CtaBox service={SERVICE_FOR[post.category.slug] ?? ''} />
+        {after && <div class="prose-light" set:html={after} />}
+        <AdSlot slot="end-article" />
+
+        <div class="mt-10 flex flex-col gap-4 border-y border-[#E6E8EC] py-5 sm:flex-row sm:items-center sm:justify-between">
+          <ShareButtons url={url} title={post.title} />
+          {post.tags.length > 0 && <p class="text-sm text-text-muted">{post.tags.map((t) => `#${t.replace(/\s+/g, '')}`).join(' ')}</p>}
+        </div>
+        <AuthorBox author={post.author} reviewer={post.reviewer} />
+        <p class="mt-6 text-xs leading-relaxed text-text-muted">This article is for general information and is not medical advice. Speak with a qualified doctor before making changes to your diet or exercise, especially if you have a medical condition. <a href="/disclaimer" class="underline">Read our disclaimer</a>.</p>
+      </div>
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-28 space-y-5">
+          <Toc items={post.toc} />
+          <a href={`/tools/${tool.slug}`} class="block rounded-[22px] bg-night p-5 text-ink transition-transform hover:-translate-y-1">
+            <p class="text-xs font-semibold uppercase tracking-[0.15em] text-primary">Free tool</p>
+            <p class="mt-2 font-display text-xl font-bold">{tool.name}</p>
+            <p class="mt-1 text-sm text-ink/70">{tool.blurb}</p>
+            <p class="mt-3 text-sm font-semibold text-primary">Try it free →</p>
+          </a>
+          <AdSlot slot="sidebar" />
+        </div>
+      </aside>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="border-t border-[#E6E8EC] bg-paper-2 py-16 md:py-20">
+      <div class="container-pf">
+        <h2 class="mb-8 font-display text-3xl font-bold tracking-tight text-text md:text-4xl">Keep reading</h2>
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{related.map((p) => <li><PostCard post={p} /></li>)}</ul>
+      </div>
+    </section>
+  )}
+</BlogLayout>
+
+<script>
+  // Reading progress bar (transform only)
+  const bar = document.querySelector<HTMLElement>('.read-progress');
+  const art = document.querySelector('article');
+  if (bar && art) {
+    const update = () => {
+      const r = art.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight)));
+      bar.style.transform = `scaleX(${p})`;
+    };
+    addEventListener('scroll', update, { passive: true });
+    update();
+  }
+</script>

@@ -1,0 +1,195 @@
+---
+import { Image } from 'astro:assets';
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Icon from '../../components/Icon.astro';
+import Ribbons from '../../components/fx/Ribbons.astro';
+import TunnelHero, { type TunnelLayer } from '../../components/fx/TunnelHero.astro';
+import { TOOLS, SITE } from '../../config/site';
+import { TOOL_MEDIA, TOOL_IMG } from '../../data/toolMedia';
+
+const signature = TOOLS.filter((t) => t.group === 'signature');
+const calculators = TOOLS.filter((t) => t.group === 'calculator');
+const listLd = {
+  '@context': 'https://schema.org', '@type': 'ItemList', name: 'Free fitness and nutrition tools',
+  itemListElement: TOOLS.map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.name, url: `${SITE.url}/tools/${t.slug}` })),
+};
+// Fly-through hero layers around the headline (kept out of the central text area at rest).
+const layers: TunnelLayer[] = [
+  { kind: 'img', img: TOOL_IMG.curry, x: 12, y: 22, mx: 15, my: 10, z: -240, w: 'h-36 w-28 md:h-60 md:w-48', rot: -6 },
+  { kind: 'img', img: TOOL_IMG.barbell, x: 88, y: 20, mx: 85, my: 11, z: -560, w: 'h-28 w-32 md:h-48 md:w-60', rot: 6 },
+  { kind: 'img', img: TOOL_IMG.waterGlass, x: 10, y: 80, mx: 18, my: 89, z: -820, w: 'h-28 w-28 md:h-44 md:w-44', rot: 3 },
+  { kind: 'img', img: TOOL_IMG.runner, x: 89, y: 80, mx: 83, my: 89, z: -380, w: 'h-32 w-28 md:h-56 md:w-44', rot: -4 },
+  { kind: 'img', img: TOOL_IMG.eggs, x: 30, y: 15, z: -1150, w: 'h-28 w-28', rot: -10 },
+  { kind: 'img', img: TOOL_IMG.yoga, x: 68, y: 91, z: -1050, w: 'h-36 w-48', rot: 8 },
+  { kind: 'img', img: TOOL_IMG.salmonBowl, x: 70, y: 15, z: -1450, w: 'h-32 w-32', rot: 5 },
+  { kind: 'img', img: TOOL_IMG.squat, x: 30, y: 92, z: -1350, w: 'h-40 w-32', rot: -5 },
+  { kind: 'chip', text: '🔥 2,540 kcal', x: 6, y: 50, z: -160, rot: -4 },
+  { kind: 'chip', text: '💪 1RM 94.5 kg', x: 94, y: 50, z: -300, rot: 4 },
+  { kind: 'chip', text: '🥗 113 g protein', x: 22, y: 64, z: -700, rot: -3 },
+  { kind: 'chip', text: '📅 Goal: 22 Jan', x: 78, y: 36, z: -900, rot: 3 },
+  { kind: 'chip', text: '💧 2.9 L', x: 50, y: 95, mx: 50, my: 95, z: -220 },
+  { kind: 'glyph', text: 'kcal', x: 20, y: 34, z: -1800 },
+  { kind: 'glyph', text: '1RM', x: 80, y: 66, z: -1600 },
+];
+const facts = [
+  { e: '🆓', t: '12 free tools, no sign-up' }, { e: '📤', t: 'Every result has a share card' }, { e: '🇮🇳', t: 'Indian & global meal plans' },
+  { e: '🔬', t: 'Formulas from published research' }, { e: '📱', t: 'Built for phones first' },
+];
+const stickers = [
+  { e: '🔥', cls: 'left-[2%] top-[10%] text-5xl', d: 1.2 }, { e: '💪', cls: 'right-[4%] top-[4%] text-6xl', d: 0.8 },
+  { e: '❤️', cls: 'left-[8%] bottom-[12%] text-4xl', d: 1.5 }, { e: '🥗', cls: 'right-[0%] bottom-[18%] text-5xl', d: 1 },
+  { e: '⚡', cls: 'left-[46%] -top-[4%] text-4xl', d: 1.7 }, { e: '🏆', cls: 'right-[0%] bottom-[46%] text-5xl', d: 1.3 },
+];
+---
+<MarketingLayout title="Free Fitness & Nutrition Tools" description="12 free fitness tools: calorie, macro, protein, BMI, body fat and 1RM calculators, plus a meal plan generator, workout split builder, goal timeline and personality quiz.">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(listLd)} />
+
+  <!-- Hero: 3D fly-through -->
+  <TunnelHero layers={layers}>
+    <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted"><ol class="flex justify-center gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">Free tools</li></ol></nav>
+    <p class="mb-6 inline-flex items-center gap-2 rounded-pill border border-white/15 bg-night/70 px-4 py-1.5 text-sm">⚡ 12 tools · 100% free · shareable results</p>
+    <h1 class="max-w-[14ch] font-display text-[clamp(2.7rem,8vw,7.25rem)] font-bold leading-[0.92] tracking-[-0.04em] [text-shadow:0_10px_40px_rgb(14_15_18/0.9)]">Know your numbers. <span class="text-primary">Own your plan.</span></h1>
+    <p class="mt-6 max-w-xl text-base text-ink/80 md:text-lg [text-shadow:0_4px_20px_rgb(14_15_18/0.95)]">Calories, macros, meal plans, training splits and more, in seconds. Then share your result as a ready-made card.</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="#signature" data-fx="magnetic" class="btn-primary">Explore tools <Icon name="arrow-down" size={16} /></a>
+      <a href="/tools/fitness-personality-quiz" class="btn-secondary bg-night/60">✨ Take the 60-sec quiz</a>
+    </div>
+  </TunnelHero>
+
+  <!-- Signature tools: pinned 3D carousel -->
+  <section id="signature" class="fx-carousel relative" data-fx="carousel">
+    <div data-fx-pin class="relative flex min-h-[100svh] flex-col justify-center overflow-hidden py-20">
+      <div class="container-pf mb-6 flex flex-col items-start justify-between gap-4 md:mb-2 md:flex-row md:items-end">
+        <div>
+          <p class="eyebrow mb-3">(Signature tools)</p>
+          <h2 data-fx="words" class="font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Made to be shared. 📤</h2>
+        </div>
+        <div data-fx-dots class="flex items-center gap-2" aria-hidden="true">{signature.map(() => <span data-fx-dot></span>)}</div>
+      </div>
+      <div data-fx-stage class="container-pf">
+        <ul data-fx-ring role="list">
+          {signature.map((t, i) => {
+            const m = TOOL_MEDIA[t.slug];
+            return (
+              <li data-fx-card>
+                <a href={`/tools/${t.slug}`} class="group relative flex h-full min-h-[420px] flex-col justify-end overflow-hidden rounded-[32px] border border-white/10 shadow-2xl shadow-black/60">
+                  <Image src={m.images[0].src} alt={m.images[0].alt} widths={[500, 900]} sizes="440px" quality={68} class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-night via-night/70 to-night/5"></div>
+                  <span class="cv-chip chip-glass absolute right-5 top-5">{m.sample}</span>
+                  <span class="cv-chip absolute left-5 top-5 font-display text-sm text-ink/70">0{i + 1} / 0{signature.length}</span>
+                  <div class="cv-body relative p-6 md:p-8">
+                    <span class="grid h-14 w-14 place-items-center rounded-2xl bg-primary text-night"><Icon name={t.icon} size={26} /></span>
+                    <h3 class="mt-5 font-display text-3xl font-bold tracking-tight md:text-4xl">{t.name}</h3>
+                    <p class="mt-2 text-ink/80">{t.blurb}</p>
+                    <div class="mt-4 flex flex-wrap gap-1.5">{m.chips.slice(0, 3).map((c) => <span class="rounded-pill bg-white/10 px-2.5 py-1 text-xs">{c}</span>)}</div>
+                    <span class="mt-5 inline-flex items-center gap-2 font-semibold text-primary">Try it free <Icon name="arrow-right" size={16} class="transition-transform group-hover:translate-x-1" /></span>
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <p class="container-pf mt-4 text-center text-xs text-muted md:mt-0">Scroll to spin ↓</p>
+    </div>
+  </section>
+
+  <Ribbons items={facts} />
+
+  <!-- Calculators: bento grid -->
+  <section class="relative py-20 md:py-28">
+    <div class="container-pf">
+      <div class="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="eyebrow mb-3">(Calculators)</p>
+          <h2 data-fx="words" class="font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">The essentials, done right. 🧮</h2>
+        </div>
+        <p class="max-w-sm text-muted">Every calculator uses a published formula and explains exactly how it works.</p>
+      </div>
+      <ul class="grid auto-rows-[220px] gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[240px]" data-fx="rise">
+        {calculators.map((t, i) => {
+          const m = TOOL_MEDIA[t.slug];
+          const big = i === 0;
+          const wide = i === 5;
+          return (
+            <li data-fx-item class:list={[big && 'lg:col-span-2 lg:row-span-2', wide && 'sm:col-span-2']}>
+              <a href={`/tools/${t.slug}`} data-fx="tilt" data-speed={String([0.15, 0.45, 0.3, 0.6][i % 4])} class="group relative flex h-full flex-col justify-end overflow-hidden rounded-[24px] border border-line">
+                <Image src={m.images[0].src} alt="" widths={[400, 800]} sizes={big || wide ? '50vw' : '25vw'} quality={65} class="absolute inset-0 h-full w-full object-cover opacity-60 transition-[transform,opacity] duration-700 ease-out-expo group-hover:scale-110 group-hover:opacity-80" />
+                <div class="absolute inset-0 bg-gradient-to-t from-night via-night/75 to-night/10"></div>
+                <span class="chip-glass absolute right-4 top-4 text-xs">{m.sample}</span>
+                <div class="relative p-5 md:p-6">
+                  <span class="grid h-11 w-11 place-items-center rounded-xl bg-primary text-night transition-transform duration-500 group-hover:-rotate-12"><Icon name={t.icon} size={20} /></span>
+                  <h3 class:list={['mt-4 font-display font-bold tracking-tight', big ? 'text-3xl md:text-4xl' : 'text-xl']}>{t.name}</h3>
+                  <p class:list={['mt-1.5 text-sm text-ink/75', !big && 'line-clamp-2']}>{t.blurb}</p>
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Share showcase: phone mockup + exploding stickers -->
+  <section class="relative overflow-hidden bg-surface/40 py-24 md:py-32">
+    <div class="container-pf grid items-center gap-16 lg:grid-cols-2">
+      <div>
+        <p class="eyebrow mb-3">(Share it)</p>
+        <h2 data-fx="words" class="font-display text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Your result, ready for the 'gram.</h2>
+        <ol class="mt-10 space-y-4" data-fx="rise">
+          {[
+            { e: '🧮', t: 'Use any tool', d: 'Enter your details. Results update instantly.' },
+            { e: '🖼️', t: 'Get your card', d: 'A branded 1080×1350 image, perfect for stories and posts.' },
+            { e: '📤', t: 'Share or tag a friend', d: 'Instagram, WhatsApp, LinkedIn or X. The link opens your exact result.' },
+          ].map((s, i) => (
+            <li data-fx-item class="flex gap-4 rounded-[22px] border border-line bg-night/60 p-5">
+              <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-surface-2 text-2xl">{s.e}</span>
+              <div><p class="font-display text-lg font-bold"><span class="mr-2 text-primary">0{i + 1}</span>{s.t}</p><p class="mt-1 text-sm text-muted">{s.d}</p></div>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div class="relative mx-auto w-full max-w-[420px] py-10" data-fx="stickers">
+        {stickers.map((s) => <span data-fx-item data-depth={s.d} class:list={['absolute z-20 select-none drop-shadow-xl', s.cls]} aria-hidden="true">{s.e}</span>)}
+        <!-- Phone -->
+        <div data-fx="tilt" class="relative mx-auto w-[260px] rounded-[44px] border-[10px] border-[#24262c] bg-night p-2 shadow-[0_40px_80px_-30px_rgb(0_0_0/0.9)] md:w-[300px]">
+          <div class="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-[#24262c]"></div>
+          <!-- Mini share card replica -->
+          <div class="relative flex aspect-[4/5] flex-col overflow-hidden rounded-[30px] bg-night p-5">
+            <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.35),transparent_70%)]"></div>
+            <div class="flex items-center gap-1.5"><span class="grid h-5 w-5 place-items-center rounded-md bg-primary"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0E0F12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15h4l2.5-6 4 10 2.5-6H21" /></svg></span><span class="font-display text-xs font-bold">Periodic<span class="text-primary">Fit</span></span></div>
+            <p class="mt-8 text-[0.6rem] font-semibold text-primary">My goal date</p>
+            <p class="font-display text-3xl font-bold leading-none tracking-tight">22 Jan 2027</p>
+            <p class="mt-1 text-[0.6rem] text-muted">82 → 74 kg in 14 weeks</p>
+            <ul class="mt-4 space-y-1.5 text-[0.6rem]">
+              {['Foundation: 4 weeks', 'Build: 7 weeks', 'Peak: 3 weeks', 'Maintain: 4 weeks'].map((l) => <li class="flex items-center gap-1.5 rounded-lg bg-surface px-2 py-1.5"><span class="h-1.5 w-1.5 rounded-full bg-primary"></span>{l}</li>)}
+            </ul>
+            <p class="mt-auto pt-3 text-[0.55rem] font-semibold">Try it free → periodicfit.com/tools</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tool-cta relative overflow-hidden py-24 md:py-32">
+    <div class="cta-media absolute inset-x-0 -inset-y-[20%]" aria-hidden="true">
+      <Image src={TOOL_IMG.foodSpread} alt="" widths={[800, 1600]} sizes="100vw" quality={60} class="h-full w-full object-cover opacity-30" />
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-night via-night/50 to-night" aria-hidden="true"></div>
+    <div class="container-pf relative text-center">
+      <h2 data-fx="words" class="mx-auto max-w-3xl font-display text-[clamp(2rem,5vw,4rem)] font-bold leading-[1] tracking-[-0.03em]">Got your numbers? <span class="text-primary">Let's build your plan.</span></h2>
+      <a href="/contact" data-open-inquiry data-fx="magnetic" class="btn-primary mt-9 px-8 py-4 text-base">Book Free Consultation <Icon name="arrow-right" size={18} /></a>
+    </div>
+  </section>
+</MarketingLayout>
+
+<script>
+  import { initFx } from '../../scripts/fx';
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+  initFx();
+  gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.fromTo('.cta-media', { yPercent: -10 }, { yPercent: 10, ease: 'none', scrollTrigger: { trigger: '.tool-cta', start: 'top bottom', end: 'bottom top', scrub: true } });
+  });
+</script>

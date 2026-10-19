@@ -1,0 +1,61 @@
+---
+import ToolFrame from './ToolFrame.astro';
+const lifts = ['Bench press', 'Squat', 'Deadlift', 'Overhead press', 'Other'];
+---
+<ToolFrame title="Your best set">
+  <Fragment slot="form">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <fieldset class="t-seg" aria-label="Units">
+        <label><input type="radio" name="u" value="kg" checked /><span>kg</span></label>
+        <label><input type="radio" name="u" value="lb" /><span>lb</span></label>
+      </fieldset>
+    </div>
+    <label class="t-field mt-4"><span class="t-label">Exercise</span>
+      <select name="lift" class="t-select">{lifts.map((l) => <option>{l}</option>)}</select>
+    </label>
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      <label class="t-field"><span class="t-label">Weight lifted</span><span class="t-input"><input type="number" name="w" inputmode="decimal" min="1" step="0.5" value="80" /><em data-u>kg</em></span></label>
+      <label class="t-field"><span class="t-label">Reps (1–12)</span><span class="t-input"><input type="number" name="r" inputmode="numeric" min="1" max="12" value="6" /><em>reps</em></span></label>
+    </div>
+    <p class="mt-3 text-xs text-muted">Use a recent set taken close to failure with good form. Most accurate under 10 reps.</p>
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Estimated one-rep max</p>
+    <p class="mt-1 flex items-baseline gap-2"><span class="t-result-num text-7xl" data-out="orm">0</span><span class="text-muted" data-u>kg</span></p>
+    <p class="mt-2 text-xs text-muted">Average of Epley (<span data-out="ep">–</span>) and Brzycki (<span data-out="br">–</span>)</p>
+    <table class="mt-5 w-full text-sm">
+      <thead><tr class="text-left text-xs text-muted"><th class="pb-2 font-medium">% of 1RM</th><th class="pb-2 font-medium">Weight</th><th class="pb-2 text-right font-medium">≈ Reps</th></tr></thead>
+      <tbody data-out="table"></tbody>
+    </table>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { num, str, wireTool, emitResult, shareUrl, countTo, round, fmt } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="one-rep-max-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    const PCT: [number, string][] = [[100, '1'], [95, '2'], [93, '3'], [90, '4'], [87, '5'], [85, '6'], [83, '7'], [80, '8'], [77, '9'], [75, '10'], [70, '12'], [65, '15']];
+    wireTool(form, () => {
+      const w = num(form, 'w'), r = Math.round(num(form, 'r')), u = str(form, 'u') || 'kg';
+      root.querySelectorAll('[data-u]').forEach((el) => (el.textContent = u));
+      if (!(w > 0 && r >= 1 && r <= 12)) return;
+      const ep = r === 1 ? w : w * (1 + r / 30);
+      const br = r === 1 ? w : w * 36 / (37 - r);
+      const orm = (ep + br) / 2;
+      const step = u === 'kg' ? 2.5 : 5;
+      countTo(root.querySelector('[data-out="orm"]'), round(orm, 1), 1);
+      root.querySelector('[data-out="ep"]')!.textContent = fmt(ep, 1);
+      root.querySelector('[data-out="br"]')!.textContent = fmt(br, 1);
+      root.querySelector('[data-out="table"]')!.innerHTML = PCT.map(([p, reps]) =>
+        `<tr class="border-t border-line"><td class="py-2 font-display font-semibold">${p}%</td><td class="py-2 tabular-nums">${fmt(Math.round(orm * p / 100 / step) * step, 1)} ${u}</td><td class="py-2 text-right text-muted">${reps}</td></tr>`).join('');
+      const lift = str(form, 'lift');
+      emitResult(form, {
+        tool: 'One-Rep Max', kicker: `My estimated ${lift === 'Other' ? '1RM' : lift.toLowerCase() + ' 1RM'}`, hero: `${fmt(orm, 1)} ${u}`, heroUnit: `from ${fmt(w, 1)} ${u} × ${r} reps`,
+        stats: [{ label: '90% (4 reps)', value: `${fmt(Math.round(orm * 0.9 / step) * step, 1)}` }, { label: '80% (8 reps)', value: `${fmt(Math.round(orm * 0.8 / step) * step, 1)}` }, { label: '70% (12 reps)', value: `${fmt(Math.round(orm * 0.7 / step) * step, 1)}` }],
+        shareText: `My estimated ${lift === 'Other' ? '1RM' : lift.toLowerCase() + ' max'} is ${fmt(orm, 1)} ${u}. What's yours?`,
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

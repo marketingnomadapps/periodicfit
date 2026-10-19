@@ -1,0 +1,29 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { LATEST_POSTS } from '../../data/home';
+---
+<section id="journal" data-section-bg="#0E0F12" class="relative py-28 md:py-36">
+  <div class="container-pf">
+    <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div>
+        <p class="eyebrow mb-4">(From the blog)</p>
+        <h2 class="split-heading text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[0.95] tracking-[-0.03em]">Learn the science.</h2>
+      </div>
+      <a href="/blog" class="btn-secondary self-start md:self-auto">All articles <Icon name="arrow-right" size={16} /></a>
+    </div>
+    <ul class="grid gap-8 md:grid-cols-3">
+      {LATEST_POSTS.map((p, i) => (
+        <li data-reveal data-reveal-delay={String(i * 0.08)}>
+          <a href={p.href} class="group block">
+            <div class="aspect-[4/3] overflow-hidden rounded-card">
+              <Image src={p.img} alt={p.alt} widths={[400, 700]} sizes="(min-width: 768px) 33vw, 100vw" class="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105" />
+            </div>
+            <p class="mt-5 text-xs font-semibold uppercase tracking-[0.15em] text-primary">{p.category}</p>
+            <h3 class="mt-2 text-xl font-semibold leading-snug group-hover:text-primary">{p.title}</h3>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,40 @@
+---
+import Icon from '../Icon.astro';
+import InquiryForm from '../InquiryForm.astro';
+import { CONTACT } from '../../config/site';
+interface Props { slug: string; name: string }
+const { slug, name } = Astro.props;
+---
+<section id="contact" class="sc relative overflow-hidden py-24 md:py-36">
+  <!-- Glow that follows the cursor -->
+  <div class="sc-glow pointer-events-none absolute left-0 top-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.16),transparent_65%)]" aria-hidden="true"></div>
+
+  <div class="container-pf relative grid gap-12 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-5">
+      <p class="eyebrow mb-4">(Get started)</p>
+      <h2 class="sc-title font-display text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[0.95] tracking-[-0.03em]" data-scramble>Ready when you are.</h2>
+      <p class="mt-6 max-w-md text-lg text-ink/75">Tell us your goal and we’ll set up a free call about {name.toLowerCase()}. No payment, no pressure.</p>
+      <ul class="mt-10 space-y-4">
+        <li class="sc-item flex items-center gap-4">
+          <span class="grid h-12 w-12 place-items-center rounded-full bg-surface-2 text-primary"><Icon name="clock" size={20} /></span>
+          <div><p class="font-semibold">Reply within 24 hours</p><p class="text-sm text-muted">{CONTACT.hours}</p></div>
+        </li>
+        <li class="sc-item">
+          <a href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noopener" class="group flex items-center gap-4">
+            <span class="grid h-12 w-12 place-items-center rounded-full bg-surface-2 text-primary transition-colors group-hover:bg-primary group-hover:text-night"><Icon name="message-circle" size={20} /></span>
+            <div><p class="font-semibold group-hover:text-primary">Prefer WhatsApp?</p><p class="text-sm text-muted">{CONTACT.phoneDisplay}</p></div>
+          </a>
+        </li>
+        <li class="sc-item">
+          <a href={`mailto:${CONTACT.email}`} class="group flex items-center gap-4">
+            <span class="grid h-12 w-12 place-items-center rounded-full bg-surface-2 text-primary transition-colors group-hover:bg-primary group-hover:text-night"><Icon name="mail" size={20} /></span>
+            <div><p class="font-semibold group-hover:text-primary">Email us</p><p class="text-sm text-muted">{CONTACT.email}</p></div>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="sc-form rounded-[28px] border border-line bg-surface/80 p-6 shadow-2xl shadow-black/40 md:p-10 lg:col-span-7">
+      <InquiryForm id="svc-inline" service={slug} />
+    </div>
+  </div>
+</section>

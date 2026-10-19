@@ -1,0 +1,15 @@
+---
+/**
+ * Light, fast reading layout. NO parallax, NO Lenis, NO auto popups — subtle fade-ins only.
+ * Phase 4 adds TOC, author box, AdSlots and related posts on top of this.
+ */
+import BaseLayout from './BaseLayout.astro';
+import type { SEOProps } from '../components/SEO.astro';
+
+interface Props extends SEOProps { darkHeader?: boolean }
+const { darkHeader = false, ...seo } = Astro.props;
+---
+<BaseLayout {...seo} theme="light" motion="subtle" darkHeader={darkHeader}>
+  <slot name="head" slot="head" />
+  <slot />
+</BaseLayout>

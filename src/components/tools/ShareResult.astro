@@ -1,0 +1,34 @@
+---
+import Icon from '../Icon.astro';
+const socials = [
+  { k: 'whatsapp', label: 'WhatsApp' },
+  { k: 'linkedin', label: 'LinkedIn' },
+  { k: 'x', label: 'X' },
+  { k: 'facebook', label: 'Facebook' },
+];
+---
+<div data-share class="share-panel rounded-[28px] border border-line bg-surface p-5 md:p-7">
+  <div class="grid items-center gap-6 md:grid-cols-[180px_1fr] md:gap-8">
+    <div class="mx-auto w-40 md:w-full">
+      <div class="aspect-[4/5] overflow-hidden rounded-2xl border border-line bg-night shadow-xl shadow-black/40">
+        <img data-share-preview alt="Preview of your shareable result card" class="h-full w-full object-cover" width="1080" height="1350" />
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow mb-2">(Share your result)</p>
+      <h2 class="font-display text-2xl font-bold tracking-tight md:text-3xl">Post it. Tag a friend. Start together.</h2>
+      <p class="mt-2 text-sm text-muted">Download a ready-made card for Instagram stories, or share the link. The link opens the same result.</p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <button type="button" data-share-btn="download" disabled class="btn-primary px-5 py-2.5 disabled:opacity-50"><Icon name="download" size={16} /> Download card</button>
+        <button type="button" data-share-btn="share" disabled class="btn-secondary px-5 py-2.5 disabled:opacity-50"><Icon name="share-2" size={16} /> Share</button>
+        <button type="button" data-share-btn="copy" disabled class="btn-secondary px-5 py-2.5 disabled:opacity-50"><Icon name="link-2" size={16} /> Copy link</button>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2 text-xs">
+        {socials.map((s) => (
+          <button type="button" data-share-btn={s.k} disabled class="rounded-pill border border-line px-3 py-1.5 text-ink/80 transition-colors hover:border-primary hover:text-primary disabled:opacity-50">{s.label}</button>
+        ))}
+      </div>
+      <p data-share-status class="mt-3 min-h-[1.25rem] text-sm text-primary" aria-live="polite"></p>
+    </div>
+  </div>
+</div>

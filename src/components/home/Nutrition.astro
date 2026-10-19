@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { IMG } from '../../data/images';
+
+const points = [
+  { t: 'Built around your plate', d: 'Vegetarian, eggetarian, non-veg or vegan. Your culture and favourite foods stay in.' },
+  { t: 'Fits your budget', d: 'Everyday ingredients from your local store, not expensive superfoods.' },
+  { t: 'Adjusted every phase', d: 'Calories and macros move with your training block and weekly progress.' },
+];
+---
+<section id="nutrition" data-section-bg="#0E0F12" class="relative py-24 md:py-40">
+  <div class="container-pf grid items-center gap-12 md:grid-cols-2 md:gap-20">
+    <div class="relative">
+      <div class="aspect-[4/5] overflow-hidden rounded-card" data-img-parallax>
+        <Image src={IMG.nutrition} alt="Colourful salad bowl with chickpeas, avocado and roasted vegetables" widths={[500, 900, 1200]} sizes="(min-width: 768px) 45vw, 100vw" quality={70} class="h-[120%] w-full object-cover" />
+      </div>
+      <!-- Floating macro widget (illustrative sample day, not a real client's plan) -->
+      <div class="nut-badge absolute -bottom-8 right-3 w-60 md:-right-10 md:w-72" data-parallax="-0.8" aria-hidden="true">
+        <div class="glass rounded-2xl p-4 md:p-5">
+          <div class="flex items-center justify-between">
+            <p class="flex items-center gap-2 text-xs text-muted"><Icon name="utensils" size={14} class="text-accent" /> Sample day</p>
+            <p class="font-display text-sm font-bold text-ink">2,050 kcal</p>
+          </div>
+          <ul class="mt-4 space-y-3 text-xs">
+            {[
+              { k: 'Protein', v: '140 g', w: 0.82, c: 'bg-primary' },
+              { k: 'Carbs', v: '210 g', w: 0.64, c: 'bg-accent' },
+              { k: 'Fats', v: '60 g', w: 0.4, c: 'bg-sky-300' },
+            ].map((m) => (
+              <li>
+                <div class="flex justify-between text-ink/80"><span>{m.k}</span><span>{m.v}</span></div>
+                <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10"><div class:list={['macro-bar h-full origin-left rounded-full', m.c]} style={`transform: scaleX(${m.w})`} data-w={m.w}></div></div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow mb-4" style="color: var(--color-accent)">(Nutrition)</p>
+      <h2 class="split-heading text-[clamp(2.2rem,5vw,4.25rem)] font-bold leading-[0.98] tracking-[-0.03em]">Diet plans you'll actually stick to.</h2>
+      <ul class="mt-10 space-y-6">
+        {points.map((p, i) => (
+          <li class="flex gap-5 border-t border-line pt-6" data-reveal data-reveal-delay={String(i * 0.08)}>
+            <span class="font-display text-sm text-accent">0{i + 1}</span>
+            <div>
+              <h3 class="text-lg font-semibold">{p.t}</h3>
+              <p class="mt-1 text-muted">{p.d}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/services/diet-plans" class="btn-accent">See diet plans <Icon name="arrow-right" size={16} /></a>
+        <a href="/tools/calorie-calculator" class="btn-secondary">Free calorie calculator</a>
+      </div>
+    </div>
+  </div>
+</section>

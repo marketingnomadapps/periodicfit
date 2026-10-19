@@ -1,0 +1,30 @@
+---
+import { ANALYTICS, ADS } from '../config/site';
+---
+<div id="cookie-banner" role="dialog" aria-modal="false" aria-labelledby="cb-title" hidden
+  data-ga4={ANALYTICS.ga4Id} data-ads-client={ADS.clientId} data-ads-enabled={String(ADS.ADSENSE_ENABLED)}
+  class="cookie-banner fixed inset-x-3 bottom-3 z-[75] mx-auto max-w-xl rounded-[24px] border border-line bg-surface p-5 text-ink shadow-[0_30px_60px_-20px_rgb(0_0_0/0.8)] sm:left-6 sm:right-auto sm:bottom-6 md:p-6">
+  <p id="cb-title" class="font-display text-lg font-bold">🍪 Your privacy, your choice</p>
+  <p class="mt-2 text-sm leading-relaxed text-ink/75">We use essential cookies to run the site. With your OK, we'd also use analytics to improve it and (later) ads to keep our tools free. Nothing extra loads until you choose. <a href="/cookie-policy" class="text-primary underline underline-offset-2">Cookie Policy</a></p>
+  <div data-cb-custom hidden class="mt-4 space-y-3 rounded-2xl border border-line bg-night/60 p-4 text-sm">
+    <label class="flex items-start justify-between gap-4"><span><span class="font-semibold">Essential</span><span class="block text-xs text-muted">Security, your cookie choice. Always on.</span></span><input type="checkbox" checked disabled class="mt-1 h-4 w-4 accent-[#C6FF3D]" /></label>
+    <label class="flex items-start justify-between gap-4"><span><span class="font-semibold">Analytics</span><span class="block text-xs text-muted">Anonymous visit statistics (Google Analytics).</span></span><input type="checkbox" name="cb-analytics" class="mt-1 h-4 w-4 accent-[#C6FF3D]" /></label>
+    <label class="flex items-start justify-between gap-4"><span><span class="font-semibold">Advertising</span><span class="block text-xs text-muted">Ads that keep tools and articles free (Google AdSense).</span></span><input type="checkbox" name="cb-ads" class="mt-1 h-4 w-4 accent-[#C6FF3D]" /></label>
+    <button type="button" data-cb-save class="btn w-full border border-ink/25 py-2.5 text-ink hover:border-primary hover:text-primary">Save my choices</button>
+  </div>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <button type="button" data-cb-accept class="btn-primary flex-1 py-2.5">Accept all</button>
+    <button type="button" data-cb-reject class="btn flex-1 border border-ink/25 py-2.5 text-ink hover:border-primary hover:text-primary">Reject</button>
+    <button type="button" data-cb-customize class="rounded-pill px-4 py-2.5 text-sm font-semibold text-ink/80 underline underline-offset-4 hover:text-primary">Customize</button>
+  </div>
+</div>
+
+<style>
+  .cookie-banner { opacity: 0; transform: translateY(24px); transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .cookie-banner.is-open { opacity: 1; transform: none; }
+</style>
+
+<script>
+  import { initConsent } from '../scripts/consent';
+  initConsent();
+</script>

@@ -1,0 +1,73 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import SvcHero from '../../components/service/SvcHero.astro';
+import SvcWho from '../../components/service/SvcWho.astro';
+import SvcFeatures from '../../components/service/SvcFeatures.astro';
+import SvcSteps from '../../components/service/SvcSteps.astro';
+import SvcSample from '../../components/service/SvcSample.astro';
+import SvcTestimonials from '../../components/service/SvcTestimonials.astro';
+import SvcContact from '../../components/service/SvcContact.astro';
+import SvcRelated from '../../components/service/SvcRelated.astro';
+import FAQ from '../../components/FAQ.astro';
+import { SERVICES, SITE } from '../../config/site';
+import { SERVICE_CONTENT } from '../../data/services';
+import { SERVICE_GALLERY } from '../../data/images';
+
+export function getStaticPaths() {
+  return SERVICES.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const service = SERVICES.find((s) => s.slug === slug)!;
+const content = SERVICE_CONTENT[slug!];
+const gallery = SERVICE_GALLERY[slug!];
+const url = `${SITE.url}/services/${slug}`;
+
+const serviceLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: service.name,
+  description: content.promise,
+  serviceType: service.name,
+  url,
+  provider: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  areaServed: 'Worldwide', // TODO: confirm target countries
+  availableChannel: { '@type': 'ServiceChannel', serviceUrl: url, availableLanguage: 'en' },
+};
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Services', item: `${SITE.url}/services` },
+    { '@type': 'ListItem', position: 3, name: service.name, item: url },
+  ],
+};
+---
+<MarketingLayout
+  title={service.name}
+  description={`${content.promise} Book a free consultation with PeriodicFit.`}
+  image={gallery[0].src.src}
+  imageAlt={gallery[0].alt}
+  service={slug}
+  autoInquiry
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(serviceLd)} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+
+  <div class="svc-progress fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0 bg-primary" aria-hidden="true"></div>
+
+  <SvcHero service={service} content={content} image={gallery[0]} />
+  <SvcWho content={content} name={service.name} />
+  <SvcFeatures content={content} gallery={gallery} />
+  <SvcSteps content={content} />
+  <SvcSample content={content} slug={service.slug} />
+  <SvcTestimonials content={content} />
+  <SvcContact slug={service.slug} name={service.name} />
+  <FAQ items={content.faq} heading={`${service.short}, explained.`} />
+  <SvcRelated slug={service.slug} />
+</MarketingLayout>
+
+<script>
+  import '../../scripts/service';
+</script>

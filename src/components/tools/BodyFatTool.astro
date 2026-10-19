@@ -1,0 +1,69 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import BodyInputs from './BodyInputs.astro';
+const tape = (name: string, label: string, cm: number) => ({ name, label, cm });
+const fields = [tape('neck', 'Neck', 38), tape('waist', 'Waist (at navel)', 86), tape('hip', 'Hips (widest point)', 98)];
+---
+<ToolFrame title="Your measurements">
+  <Fragment slot="form">
+    <BodyInputs fields={['sex', 'height', 'weight']} />
+    <div class="mt-3 grid grid-cols-2 gap-3">
+      {fields.map((f) => (
+        <>
+          <label class="t-field" data-unit="metric" data-female-only={f.name === 'hip' ? '' : undefined}><span class="t-label">{f.label}</span><span class="t-input"><input type="number" name={`${f.name}_cm`} inputmode="decimal" step="0.5" value={f.cm} /><em>cm</em></span></label>
+          <label class="t-field" data-unit="imperial" hidden data-female-only={f.name === 'hip' ? '' : undefined}><span class="t-label">{f.label}</span><span class="t-input"><input type="number" name={`${f.name}_in`} inputmode="decimal" step="0.25" value={Math.round(f.cm / 2.54 * 4) / 4} /><em>in</em></span></label>
+        </>
+      ))}
+    </div>
+    <p class="mt-3 text-xs text-muted">Measure relaxed, tape flat on skin. Hips are only used for women.</p>
+  </Fragment>
+  <Fragment slot="result">
+    <p class="text-sm text-ink/70">Estimated body fat</p>
+    <div class="mt-1 flex items-end justify-between gap-3">
+      <span class="t-result-num text-7xl"><span data-out="bf">0</span><span class="text-4xl text-muted">%</span></span>
+      <span class="mb-2 rounded-pill bg-primary/15 px-3 py-1 text-sm font-semibold text-primary" data-out="cat">–</span>
+    </div>
+    <dl class="mt-6 grid grid-cols-2 gap-3">
+      <div class="t-stat"><dt>Fat mass</dt><dd data-out="fm">–</dd></div>
+      <div class="t-stat"><dt>Lean mass</dt><dd data-out="lm">–</dd></div>
+    </dl>
+    <ul class="mt-5 space-y-1.5 text-xs" data-out="scale"></ul>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { bodyMetrics, num, str, wireTool, emitResult, shareUrl, countTo, round, fmt, syncUnits } from '../../scripts/tools/common';
+  const root = document.querySelector<HTMLElement>('[data-tool="body-fat-calculator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    // ACE body fat categories
+    const CATS = { male: [['Essential fat', 2, 5], ['Athletes', 6, 13], ['Fitness', 14, 17], ['Average', 18, 24], ['Above average', 25, 99]], female: [['Essential fat', 10, 13], ['Athletes', 14, 20], ['Fitness', 21, 24], ['Average', 25, 31], ['Above average', 32, 99]] } as const;
+    const tapeCm = (n: string) => (str(form, 'unit') === 'imperial' ? num(form, `${n}_in`) * 2.54 : num(form, `${n}_cm`));
+    wireTool(form, () => {
+      const sex = (str(form, 'sex') || 'male') as 'male' | 'female';
+      form.querySelectorAll<HTMLElement>('[data-female-only]').forEach((el) => { if (sex === 'male') el.hidden = true; });
+      if (sex === 'female') syncUnits(form);
+      const { cm, kg, unit } = bodyMetrics(form);
+      const neck = tapeCm('neck'), waist = tapeCm('waist'), hip = tapeCm('hip');
+      if (!(cm > 100 && neck > 20 && waist > neck)) return;
+      // US Navy method (Hodgdon & Beckett), centimetre form
+      const bf = sex === 'male'
+        ? 495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(cm)) - 450
+        : 495 / (1.29579 - 0.35004 * Math.log10(waist + hip - neck) + 0.221 * Math.log10(cm)) - 450;
+      if (!isFinite(bf) || bf < 2 || bf > 70) return;
+      const cat = CATS[sex].find(([, lo, hi]) => bf >= lo - 0.5 && bf < hi + 0.5)?.[0] ?? 'Above average';
+      countTo(root.querySelector('[data-out="bf"]'), round(bf, 1), 1);
+      root.querySelector('[data-out="cat"]')!.textContent = cat;
+      const fm = kg * bf / 100, lm = kg - fm, u = unit === 'imperial' ? 'lb' : 'kg', k = unit === 'imperial' ? 2.20462 : 1;
+      root.querySelector('[data-out="fm"]')!.textContent = kg > 0 ? `${fmt(fm * k, 1)} ${u}` : '–';
+      root.querySelector('[data-out="lm"]')!.textContent = kg > 0 ? `${fmt(lm * k, 1)} ${u}` : '–';
+      root.querySelector('[data-out="scale"]')!.innerHTML = CATS[sex].map(([n, lo, hi]) => `<li class="flex justify-between rounded-lg px-3 py-1.5 ${n === cat ? 'bg-primary/15 text-primary font-semibold' : 'text-muted'}"><span>${n}</span><span>${hi === 99 ? `${lo}%+` : `${lo}–${hi}%`}</span></li>`).join('');
+      emitResult(form, {
+        tool: 'Body Fat Calculator', kicker: 'My estimated body fat', hero: `${bf.toFixed(1)}%`, heroUnit: cat,
+        stats: kg > 0 ? [{ label: 'Lean mass', value: `${fmt(lm * k, 1)} ${u}` }, { label: 'Fat mass', value: `${fmt(fm * k, 1)} ${u}` }] : [],
+        shareText: 'Measured my body fat with just a tape measure. Try the free PeriodicFit body fat calculator:',
+        url: shareUrl(form),
+      });
+    });
+  }
+</script>

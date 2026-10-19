@@ -1,0 +1,45 @@
+---
+import Icon from '../Icon.astro';
+import type { ServiceContent } from '../../data/services';
+interface Props { content: ServiceContent }
+const { content } = Astro.props;
+// TODO: placeholder testimonials. Replace with real, consented reviews before launch.
+const row = [...content.testimonials, ...content.testimonials];
+---
+<section id="stories" class="relative overflow-hidden py-24 md:py-32">
+  <div class="container-pf mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <div>
+      <p class="eyebrow mb-4">(Client stories)</p>
+      <h2 class="svc-heading text-[clamp(2.2rem,5.5vw,4.5rem)] font-bold leading-[0.98] tracking-[-0.03em]">Real routines. Real wins.</h2>
+    </div>
+    <p class="text-xs text-muted">Individual results vary.</p>
+  </div>
+
+  {[0, 1].map((r) => (
+    <div class="ts-skew mb-4 md:mb-6">
+      <ul class:list={['ts-row flex w-max gap-4 md:gap-6', r === 1 && 'ts-reverse']} aria-hidden={r === 1 ? 'true' : undefined}>
+        {[...row, ...row].map((t) => (
+          <li class="w-[300px] shrink-0 rounded-[24px] border border-line bg-surface p-6 md:w-[420px] md:p-8">
+            <Icon name="quote" size={26} class="text-primary" />
+            <p class="mt-4 text-base leading-relaxed text-ink md:text-lg">“{t.quote}”</p>
+            <div class="mt-6 flex items-center gap-3">
+              <span class="grid h-10 w-10 place-items-center rounded-full bg-surface-2 font-display text-sm font-bold text-primary">{t.name.charAt(0)}</span>
+              <div>
+                <p class="font-semibold">{t.name}</p>
+                <p class="text-xs text-muted">{t.detail}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</section>
+
+<style>
+  .ts-row { animation: ts-scroll 60s linear infinite; }
+  .ts-reverse { animation-direction: reverse; animation-duration: 70s; }
+  .ts-skew:hover .ts-row { animation-play-state: paused; }
+  @keyframes ts-scroll { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .ts-row { animation: none; } }
+</style>

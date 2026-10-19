@@ -1,0 +1,97 @@
+---
+import ToolFrame from './ToolFrame.astro';
+import Icon from '../Icon.astro';
+const diets = [{ v: 'vegan', l: 'Vegan', i: 'leaf' }, { v: 'veg', l: 'Vegetarian', i: 'salad' }, { v: 'egg', l: 'Eggetarian', i: 'egg' }, { v: 'nonveg', l: 'Non-veg', i: 'drumstick' }];
+---
+<ToolFrame title="Your preferences">
+  <Fragment slot="form">
+    <label class="t-field"><span class="t-label">Daily calories</span><span class="t-input"><input type="number" name="kcal" inputmode="numeric" min="1200" max="4500" step="50" value="2000" /><em>kcal</em></span></label>
+    <p class="mt-1.5 text-xs text-muted">Not sure? <a href="/tools/calorie-calculator" class="text-primary underline underline-offset-2">Find your calories first</a>.</p>
+    <div class="mt-4">
+      <span class="t-label">Diet</span>
+      <div class="t-chips mt-2">
+        {diets.map((d, i) => <label><input type="radio" name="diet" value={d.v} checked={i === 1} /><span><Icon name={d.i} size={15} />{d.l}</span></label>)}
+      </div>
+    </div>
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <div>
+        <span class="t-label">Cuisine</span>
+        <fieldset class="t-seg mt-2" aria-label="Cuisine">
+          <label><input type="radio" name="cuisine" value="indian" checked /><span>Indian</span></label>
+          <label><input type="radio" name="cuisine" value="global" /><span>Global</span></label>
+        </fieldset>
+      </div>
+      <div>
+        <span class="t-label">Meals a day</span>
+        <fieldset class="t-seg mt-2" aria-label="Meals a day">
+          {[3, 4, 5].map((n) => <label><input type="radio" name="meals" value={n} checked={n === 4} /><span>{n}</span></label>)}
+        </fieldset>
+      </div>
+    </div>
+    <input type="hidden" name="s" value="1" />
+    <button type="button" data-shuffle class="btn-secondary mt-6 w-full"><Icon name="shuffle" size={16} /> Shuffle meals</button>
+  </Fragment>
+  <Fragment slot="result">
+    <div class="flex items-end justify-between gap-3">
+      <div>
+        <p class="text-sm text-ink/70">Your sample day</p>
+        <p class="mt-1 flex items-baseline gap-2"><span class="t-result-num text-5xl" data-out="total">0</span><span class="text-muted">kcal</span></p>
+      </div>
+      <p class="text-right text-xs text-muted">P <span class="font-semibold text-ink" data-out="p">0</span> g · C <span class="font-semibold text-ink" data-out="c">0</span> g · F <span class="font-semibold text-ink" data-out="f">0</span> g</p>
+    </div>
+    <ol class="mt-5 space-y-2" data-out="meals"></ol>
+    <button type="button" data-open-inquiry data-service="diet-plans" class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">Want a dietitian to personalise this? <Icon name="arrow-right" size={14} /></button>
+  </Fragment>
+</ToolFrame>
+
+<script>
+  import { num, str, wireTool, emitResult, shareUrl, countTo, round, fmt } from '../../scripts/tools/common';
+  import { MEALS, SPLITS, DIET_RANK, type Diet, type Meal } from '../../data/meals';
+  const root = document.querySelector<HTMLElement>('[data-tool="meal-plan-generator"]');
+  const form = root?.querySelector<HTMLFormElement>('form');
+  if (root && form) {
+    const seedInput = form.elements.namedItem('s') as HTMLInputElement;
+    const rng = (seed: number) => () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const DIET_LABEL: Record<Diet, string> = { vegan: 'vegan', veg: 'vegetarian', egg: 'eggetarian', nonveg: 'non-veg' };
+    const compute = () => {
+      const kcal = num(form, 'kcal');
+      if (!(kcal >= 1000 && kcal <= 5000)) return;
+      const diet = (str(form, 'diet') || 'veg') as Diet;
+      const cuisine = str(form, 'cuisine') || 'indian';
+      const split = SPLITS[num(form, 'meals') || 4];
+      const rand = rng(Number(seedInput.value) || 1);
+      const used = new Set<string>();
+      const plan = split.map((s) => {
+        const pool = MEALS.filter((x) => x.slot === s.slot && x.cuisine === cuisine && DIET_RANK[x.diet] <= DIET_RANK[diet] && !used.has(x.name));
+        // Favour meals that match the chosen diet exactly, so non-veg plans actually include non-veg
+        const exact = pool.filter((x) => x.diet === diet);
+        const pickFrom = exact.length && rand() < 0.6 ? exact : pool;
+        const meal = pickFrom[Math.floor(rand() * pickFrom.length)] as Meal;
+        used.add(meal.name);
+        const mult = Math.min(2.5, Math.max(0.5, Math.round((kcal * s.share) / meal.kcal * 4) / 4));
+        return { ...s, meal, mult };
+      });
+      const tot = plan.reduce((a, x) => ({ k: a.k + x.meal.kcal * x.mult, p: a.p + x.meal.p * x.mult, c: a.c + x.meal.c * x.mult, f: a.f + x.meal.f * x.mult }), { k: 0, p: 0, c: 0, f: 0 });
+      countTo(root.querySelector('[data-out="total"]'), round(tot.k, -1));
+      root.querySelector('[data-out="p"]')!.textContent = String(round(tot.p));
+      root.querySelector('[data-out="c"]')!.textContent = String(round(tot.c));
+      root.querySelector('[data-out="f"]')!.textContent = String(round(tot.f));
+      root.querySelector('[data-out="meals"]')!.innerHTML = plan.map((x) => `<li class="meal-item rounded-2xl border border-line bg-night/55 p-3.5">
+        <div class="flex items-center justify-between gap-3"><span class="text-xs font-semibold uppercase tracking-[0.14em] text-primary">${x.label}</span><span class="font-display text-sm font-bold tabular-nums">${fmt(round(x.meal.kcal * x.mult, -1))} kcal</span></div>
+        <p class="mt-1 font-semibold">${x.meal.name}${x.mult !== 1 ? ` <span class="text-xs font-medium text-muted">× ${x.mult} serving</span>` : ''}</p>
+        <p class="text-xs text-muted">${x.meal.serving} · ${round(x.meal.p * x.mult)} g protein</p></li>`).join('');
+      emitResult(form, {
+        tool: 'Meal Plan Generator', kicker: `My ${fmt(kcal)} kcal ${DIET_LABEL[diet]} day`, hero: `${round(tot.p)} g`, heroUnit: 'protein in one day of real food',
+        list: plan.map((x) => `${x.label}: ${x.meal.name}`),
+        shareText: `Got a free ${DIET_LABEL[diet]} meal plan with ${round(tot.p)}g protein from PeriodicFit. Make yours:`,
+        url: shareUrl(form, { s: seedInput.value }),
+      });
+    };
+    root.querySelector('[data-shuffle]')?.addEventListener('click', () => {
+      seedInput.value = String(Math.floor(Math.random() * 1e6));
+      compute();
+      root.querySelectorAll('.meal-item').forEach((el, i) => el.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 400, delay: i * 60, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+    });
+    wireTool(form, compute);
+  }
+</script>

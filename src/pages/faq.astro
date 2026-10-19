@@ -1,0 +1,50 @@
+---
+import MarketingLayout from '../layouts/MarketingLayout.astro';
+import FAQ from '../components/FAQ.astro';
+import Icon from '../components/Icon.astro';
+import { HOME_FAQ } from '../data/home';
+
+const groups = [
+  { id: 'faq-coaching', eyebrow: '(Coaching)', heading: 'Coaching & training', items: HOME_FAQ.slice(0, 2).concat([
+    { q: 'How often will I hear from my coach?', a: 'You get a structured weekly check-in plus WhatsApp support for questions in between.' },
+    { q: 'What if I miss workouts or travel?', a: 'Tell your coach. Plans are adjusted around travel, busy weeks and illness. Consistency over perfection.' },
+  ]) },
+  { id: 'faq-nutrition', eyebrow: '(Nutrition)', heading: 'Diet & nutrition', items: HOME_FAQ.slice(2, 4).concat([
+    { q: 'Do I have to count calories?', a: 'Not necessarily. Many clients follow portion-based plans. We use numbers only when they help you.' },
+    { q: 'Can I eat out or attend festivals?', a: 'Yes. Your plan includes guidance for restaurants, celebrations and travel so life doesn’t stop.' },
+  ]) },
+  { id: 'faq-tools', eyebrow: '(Free tools)', heading: 'Our free tools', items: [
+    { q: 'Are the tools really free?', a: 'Yes. All 12 tools are free with no sign-up. They run in your browser.' },
+    { q: 'Do you store what I type into the calculators?', a: 'No. Calculations happen on your device. If you share a result, the link only contains the values you entered.' },
+    { q: 'How accurate are the calculators?', a: 'They use published formulas and give good estimates for most healthy adults, but they can’t replace an assessment by a professional.' },
+  ] },
+  { id: 'faq-billing', eyebrow: '(Payments)', heading: 'Payments & refunds', items: [
+    { q: 'Is the first consultation free?', a: 'Yes. You never pay to talk to us.' },
+    { q: 'Can I cancel anytime?', a: 'Subscriptions can be cancelled before the next billing date. See our Refund Policy for details.' },
+  ] },
+  { id: 'faq-safety', eyebrow: '(Safety & privacy)', heading: 'Safety & privacy', items: HOME_FAQ.slice(4).concat([
+    { q: 'Is my health information private?', a: 'Yes. Only the coaches and dietitians working with you can see it, and we never sell data.' },
+  ]) },
+];
+const ld = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: groups.flatMap((g) => g.items).map((i) => ({ '@type': 'Question', name: i.q, acceptedAnswer: { '@type': 'Answer', text: i.a } })) };
+---
+<MarketingLayout title="FAQ" description="Answers about PeriodicFit coaching, diet plans, free tools, payments, refunds, safety and privacy." transparentHeader={false}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <section class="relative pb-6 pt-12 md:pt-16">
+    <div class="container-pf">
+      <nav aria-label="Breadcrumb" class="mb-5 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">FAQ</li></ol></nav>
+      <h1 data-fx="words" class="max-w-4xl font-display text-[clamp(2.6rem,6.5vw,6rem)] font-bold leading-[0.93] tracking-[-0.04em]">Everything you <span class="text-primary">wanted to ask.</span></h1>
+      <nav aria-label="FAQ topics" class="mt-8 flex flex-wrap gap-2">
+        {groups.map((g) => <a href={`#${g.id}`} class="rounded-pill border border-line px-4 py-2 text-sm hover:border-primary hover:text-primary">{g.heading}</a>)}
+      </nav>
+    </div>
+  </section>
+  {groups.map((g) => <FAQ id={g.id} eyebrow={g.eyebrow} heading={g.heading} items={g.items} schema={false} />)}
+  <section class="pb-24 text-center">
+    <a href="/contact" data-open-inquiry class="btn-primary px-8 py-4 text-base">Still have a question? Ask a coach <Icon name="arrow-right" size={18} /></a>
+  </section>
+</MarketingLayout>
+<script>
+  import { initFx } from '../scripts/fx';
+  initFx();
+</script>

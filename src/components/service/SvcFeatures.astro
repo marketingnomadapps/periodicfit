@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import type { ServiceContent } from '../../data/services';
+interface Props { content: ServiceContent; gallery: { src: ImageMetadata; alt: string }[] }
+const { content, gallery } = Astro.props;
+const total = String(content.features.length).padStart(2, '0');
+---
+<section id="features" class="feat relative bg-surface/40 py-24 md:py-36">
+  <div class="container-pf">
+    <div class="mb-12 max-w-3xl md:mb-16">
+      <p class="eyebrow mb-4">(What you get)</p>
+      <h2 class="svc-heading text-[clamp(2.2rem,5.5vw,4.5rem)] font-bold leading-[0.98] tracking-[-0.03em]">Everything included.<br />Nothing generic.</h2>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-12 lg:gap-16">
+      <!-- Sticky media frame -->
+      <div class="sticky top-[4.5rem] z-10 self-start lg:static lg:col-span-5 lg:self-stretch">
+        <div class="feat-frame h-[30svh] lg:sticky overflow-hidden rounded-[28px] shadow-2xl shadow-black/50 lg:top-28 lg:h-[68vh]">
+          {gallery.map((g, i) => (
+            <Image src={g.src} alt={g.alt} widths={[500, 900]} sizes="(min-width: 1024px) 40vw, 100vw" quality={68} class:list={['feat-img absolute inset-0 h-full w-full object-cover', i > 0 && 'opacity-0']} data-index={i} />
+          ))}
+          <div class="absolute inset-0 bg-gradient-to-t from-night/90 via-night/10 to-transparent"></div>
+          <div class="absolute inset-x-0 bottom-0 flex items-end justify-between p-5 md:p-7">
+            <p class="feat-now font-display text-lg font-bold md:text-2xl">{content.features[0].title}</p>
+            <p class="font-display text-sm text-ink/70"><span class="feat-count text-primary">01</span> / {total}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature list -->
+      <ol class="feat-list relative z-0 lg:col-span-7">
+        {content.features.map((f, i) => (
+          <li class="feat-item flex min-h-[34svh] items-center border-b border-line py-10 last:border-0 lg:min-h-[44vh]" data-index={i} data-title={f.title}>
+            <div class="flex gap-5 md:gap-8">
+              <span class="feat-icon grid h-16 w-16 shrink-0 place-items-center rounded-2xl border border-line bg-night text-primary md:h-20 md:w-20">
+                <Icon name={f.icon} size={30} strokeWidth={1.75} />
+              </span>
+              <div>
+                <span class="font-display text-sm text-muted">{String(i + 1).padStart(2, '0')}</span>
+                <h3 class="mt-1 font-display text-2xl font-bold tracking-tight md:text-4xl">{f.title}</h3>
+                <p class="mt-3 max-w-md text-muted md:text-lg">{f.text}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Inactive items are dimmed with colour (not opacity) so text keeps WCAG contrast */
+  .feat-item h3, .feat-item p, .feat-item .feat-icon { transition: color 0.5s ease, border-color 0.5s ease, background-color 0.5s ease; }
+  :global(.js-motion) .feat-item:not(.is-active) h3 { color: #8A909A; }
+  :global(.js-motion) .feat-item:not(.is-active) p { color: #7E848E; }
+  :global(.js-motion) .feat-item:not(.is-active) .feat-icon { color: #7E848E; }
+  .feat-item.is-active .feat-icon { border-color: var(--color-primary); background: rgb(198 255 61 / 0.08); }
+</style>

@@ -1,0 +1,15 @@
+---
+interface Props { class?: string; light?: boolean }
+const { class: className = '', light = false } = Astro.props;
+---
+<a href="/" class:list={['group inline-flex items-center gap-2.5', className]} aria-label="PeriodicFit home">
+  <!-- Mark: a rising pulse line inside a rounded square (progress over time) -->
+  <span class="grid h-9 w-9 place-items-center rounded-[11px] bg-primary text-night transition-transform duration-500 ease-out-expo group-hover:-rotate-6" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 15h4l2.5-6 4 10 2.5-6H21" />
+    </svg>
+  </span>
+  <span class:list={['font-display text-lg font-bold tracking-tight', light ? 'text-text' : 'text-ink']}>
+    Periodic<span class={light ? 'text-[#C2410C]' : 'text-primary'}>Fit</span>
+  </span>
+</a>

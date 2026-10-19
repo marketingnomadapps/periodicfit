@@ -1,0 +1,31 @@
+---
+import Icon from './Icon.astro';
+import InquiryForm from './InquiryForm.astro';
+interface Props { service?: string }
+const { service = '' } = Astro.props;
+---
+<div id="inquiry-modal" class="iq-modal fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="iq-modal-title" hidden data-lenis-prevent>
+  <div class="iq-backdrop absolute inset-0 bg-night/80 backdrop-blur-sm" data-close-inquiry></div>
+  <div class="iq-panel relative max-h-[92svh] w-full max-w-2xl overflow-y-auto rounded-t-[28px] border border-line bg-surface p-6 shadow-2xl sm:rounded-[28px] md:p-8">
+    <button type="button" class="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-line text-ink transition-colors hover:border-primary hover:text-primary" aria-label="Close" data-close-inquiry>
+      <Icon name="x" size={18} />
+    </button>
+    <p class="eyebrow mb-2">(Free consultation)</p>
+    <h2 id="iq-modal-title" class="pr-10 font-display text-3xl font-bold tracking-tight md:text-4xl">Let's build your plan.</h2>
+    <p class="mb-6 mt-2 text-muted">Tell us a little about you. A coach will reach out within 24 hours.</p>
+    <InquiryForm id="iq-modal" service={service} />
+  </div>
+</div>
+
+<style>
+  .iq-modal .iq-backdrop { opacity: 0; transition: opacity 0.3s ease; }
+  .iq-modal .iq-panel { opacity: 0; transform: translateY(40px) scale(0.98); transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+  .iq-modal.is-open .iq-backdrop { opacity: 1; }
+  .iq-modal.is-open .iq-panel { opacity: 1; transform: none; }
+  .iq-modal[hidden] { display: none; }
+</style>
+
+<script>
+  import { initInquiryModal } from '../scripts/inquiry';
+  initInquiryModal();
+</script>

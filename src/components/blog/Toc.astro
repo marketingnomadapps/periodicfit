@@ -1,0 +1,37 @@
+---
+import type { TocItem } from '../../lib/posts';
+interface Props { items: TocItem[] }
+const { items } = Astro.props;
+---
+{items.length > 1 && (
+  <nav class="toc rounded-[22px] border border-[#E6E8EC] bg-white p-5" aria-label="Table of contents">
+    <p class="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-text-muted">On this page</p>
+    <ol class="space-y-1.5 text-sm">
+      {items.map((t) => (
+        <li class:list={[t.level === 3 && 'pl-4']}>
+          <a href={`#${t.id}`} data-toc={t.id} class="block rounded-lg border-l-2 border-transparent px-3 py-1 text-text-muted transition-colors hover:text-text">{t.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<script>
+  // Highlight the section being read
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc]'));
+  if (links.length && 'IntersectionObserver' in window) {
+    const map = new Map(links.map((l) => [l.dataset.toc!, l]));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        links.forEach((l) => l.classList.remove('is-active'));
+        map.get(e.target.id)?.classList.add('is-active');
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    map.forEach((_, id) => { const h = document.getElementById(id); if (h) io.observe(h); });
+  }
+</script>
+
+<style>
+  .toc a.is-active { border-color: var(--color-primary); color: var(--color-text); font-weight: 600; background: rgb(198 255 61 / 0.15); }
+</style>

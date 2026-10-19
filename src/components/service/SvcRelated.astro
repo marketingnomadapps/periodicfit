@@ -1,0 +1,55 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../Icon.astro';
+import { SERVICES } from '../../config/site';
+import { SERVICE_IMAGES } from '../../data/images';
+import { LATEST_POSTS } from '../../data/home';
+interface Props { slug: string }
+const { slug } = Astro.props;
+const others = SERVICES.filter((s) => s.slug !== slug);
+// TODO (Phase 4): pull 3 posts from the blog collection matching the service's blog category.
+const posts = LATEST_POSTS;
+---
+<section id="related" class="relative py-24 md:py-32">
+  <div class="container-pf">
+    <div class="mb-10 flex items-end justify-between gap-6">
+      <div>
+        <p class="eyebrow mb-4">(Keep learning)</p>
+        <h2 class="svc-heading text-[clamp(2rem,4.5vw,3.5rem)] font-bold leading-[1] tracking-[-0.03em]">From the blog.</h2>
+      </div>
+      <a href="/blog" class="btn-secondary hidden md:inline-flex">All articles <Icon name="arrow-right" size={16} /></a>
+    </div>
+    <ul class="grid gap-6 md:grid-cols-3">
+      {posts.map((p) => (
+        <li class="rel-card [perspective:1000px]">
+          <a href={p.href} class="rel-tilt group block rounded-[24px] border border-line bg-surface p-3 transition-colors hover:border-primary/50 [transform-style:preserve-3d]">
+            <div class="aspect-[16/10] overflow-hidden rounded-[18px]">
+              <Image src={p.img} alt={p.alt} widths={[400, 700]} sizes="(min-width: 768px) 33vw, 100vw" quality={68} class="h-full w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105" />
+            </div>
+            <div class="p-3 pt-5 [transform:translateZ(30px)]">
+              <p class="text-xs font-semibold uppercase tracking-[0.15em] text-primary">{p.category}</p>
+              <h3 class="mt-2 text-lg font-semibold leading-snug">{p.title}</h3>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-24 md:mt-32">
+      <p class="eyebrow mb-6">(Explore other services)</p>
+      <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {others.map((s) => (
+          <li class="rel-svc">
+            <a href={`/services/${s.slug}`} class="group flex items-center gap-4 rounded-[20px] border border-line bg-surface p-3 pr-4 transition-colors hover:border-primary/50">
+              <span class="h-14 w-14 shrink-0 overflow-hidden rounded-[14px]">
+                <Image src={SERVICE_IMAGES[s.slug].src} alt="" widths={[112]} sizes="56px" quality={65} class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              </span>
+              <span class="min-w-0 flex-1 text-sm font-semibold leading-tight group-hover:text-primary">{s.name}</span>
+              <Icon name="arrow-up-right" size={16} class="shrink-0 text-muted transition-transform duration-300 group-hover:rotate-45 group-hover:text-primary" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>

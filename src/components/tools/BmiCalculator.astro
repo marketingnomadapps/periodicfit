@@ -1,0 +1,113 @@
+---
+/**
+ * BMI calculator (WHO adult categories). Reused in the hero (glass variant) and on /tools/bmi-calculator.
+ * Logic lives in src/scripts/tools/bmi.ts.
+ */
+import Icon from '../Icon.astro';
+
+interface Props { id?: string; variant?: 'glass' | 'solid'; class?: string }
+const { id = 'bmi', variant = 'glass', class: className = '' } = Astro.props;
+---
+<form
+  class:list={['bmi-calc rounded-[24px] p-5 text-ink md:p-6', variant === 'glass' ? 'bmi-glass' : 'border border-line bg-surface', className]}
+  data-bmi
+  novalidate
+  aria-labelledby={`${id}-title`}
+>
+  <div class="flex items-center justify-between gap-3">
+    <h2 id={`${id}-title`} class="flex items-center gap-2 font-display text-base font-semibold">
+      <span class="grid h-7 w-7 place-items-center rounded-full bg-primary text-night"><Icon name="calculator" size={15} strokeWidth={2.4} /></span>
+      Quick BMI check
+    </h2>
+    <fieldset class="bmi-units flex rounded-pill bg-white/10 p-0.5 text-xs">
+      <legend class="sr-only">Units</legend>
+      <label class="cursor-pointer"><input type="radio" name={`${id}-unit`} value="metric" class="peer sr-only" checked /><span class="block rounded-pill px-3 py-1 text-ink/70 transition-colors peer-checked:bg-primary peer-checked:text-night peer-focus-visible:outline-2 peer-focus-visible:outline-primary">kg / cm</span></label>
+      <label class="cursor-pointer"><input type="radio" name={`${id}-unit`} value="imperial" class="peer sr-only" /><span class="block rounded-pill px-3 py-1 text-ink/70 transition-colors peer-checked:bg-primary peer-checked:text-night peer-focus-visible:outline-2 peer-focus-visible:outline-primary">lb / ft</span></label>
+    </fieldset>
+  </div>
+
+  <div class="mt-4 grid grid-cols-2 gap-3">
+    <!-- Metric -->
+    <label class="bmi-field" data-unit="metric">
+      <span>Height</span>
+      <span class="bmi-input"><input type="number" name="cm" inputmode="decimal" min="100" max="250" step="0.5" value="175" aria-label="Height in centimetres" /><em>cm</em></span>
+    </label>
+    <label class="bmi-field" data-unit="metric">
+      <span>Weight</span>
+      <span class="bmi-input"><input type="number" name="kg" inputmode="decimal" min="25" max="300" step="0.5" value="72" aria-label="Weight in kilograms" /><em>kg</em></span>
+    </label>
+    <!-- Imperial -->
+    <div class="bmi-field" data-unit="imperial" hidden>
+      <span>Height</span>
+      <span class="grid grid-cols-2 gap-2">
+        <span class="bmi-input"><input type="number" name="ft" inputmode="numeric" min="3" max="8" value="5" aria-label="Height, feet" /><em>ft</em></span>
+        <span class="bmi-input"><input type="number" name="in" inputmode="numeric" min="0" max="11" value="9" aria-label="Height, inches" /><em>in</em></span>
+      </span>
+    </div>
+    <label class="bmi-field" data-unit="imperial" hidden>
+      <span>Weight</span>
+      <span class="bmi-input"><input type="number" name="lb" inputmode="decimal" min="55" max="660" step="0.5" value="160" aria-label="Weight in pounds" /><em>lb</em></span>
+    </label>
+  </div>
+
+  <div class="mt-5 flex items-end justify-between gap-4" aria-live="polite">
+    <div>
+      <p class="text-xs text-ink/70">Your BMI</p>
+      <p class="mt-1.5 font-display text-4xl font-bold leading-none tracking-tight tabular-nums md:text-5xl"><span data-bmi-value>23.5</span></p>
+    </div>
+    <p class="bmi-badge rounded-pill px-3 py-1 text-xs font-semibold" data-bmi-category>Healthy weight</p>
+  </div>
+
+  <!-- Scale: 15 → 40 -->
+  <div class="relative mt-4" aria-hidden="true">
+    <div class="flex h-2 overflow-hidden rounded-full">
+      <span class="bg-sky-300" style="width: 14%"></span>
+      <span class="bg-primary" style="width: 26%"></span>
+      <span class="bg-amber-300" style="width: 20%"></span>
+      <span class="bg-accent" style="width: 40%"></span>
+    </div>
+    <span class="bmi-marker absolute -top-1 h-4 w-1.5 -translate-x-1/2 rounded-full bg-white shadow-[0_0_0_3px_rgb(14_15_18/0.6)] transition-[left] duration-500 ease-out-expo" style="left: 34%"></span>
+    <div class="mt-2 flex justify-between text-[0.65rem] text-ink/60"><span>18.5</span><span>25</span><span>30</span><span>40</span></div>
+  </div>
+
+  <div class="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs">
+    <p class="text-ink/60">A screening estimate, not a diagnosis.</p>
+    <a href="/tools/bmi-calculator" class="inline-flex shrink-0 items-center gap-1 font-semibold text-primary hover:underline">Full guide <Icon name="arrow-right" size={13} /></a>
+  </div>
+</form>
+
+<style>
+  .bmi-glass {
+    background: linear-gradient(160deg, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0.03));
+    border: 1px solid rgb(255 255 255 / 0.16);
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.12);
+    backdrop-filter: blur(6px) saturate(1.2);
+    -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  }
+  .bmi-field { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.75rem; color: rgb(244 245 247 / 0.75); }
+  .bmi-field[hidden] { display: none; }
+  .bmi-input { position: relative; display: block; }
+  .bmi-input input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(14 15 18 / 0.45);
+    padding: 0.6rem 2.3rem 0.6rem 0.8rem;
+    font: 600 1rem/1.2 var(--font-display);
+    color: var(--color-ink);
+    -moz-appearance: textfield;
+    transition: border-color 0.2s;
+  }
+  .bmi-input input::-webkit-outer-spin-button, .bmi-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .bmi-input input:focus { outline: none; border-color: var(--color-primary); }
+  .bmi-input em { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 0.75rem; color: rgb(244 245 247 / 0.55); pointer-events: none; }
+  .bmi-badge { background: rgb(198 255 61 / 0.18); color: var(--color-primary); }
+  .bmi-badge[data-level='under'] { background: rgb(125 211 252 / 0.18); color: #7DD3FC; }
+  .bmi-badge[data-level='over'] { background: rgb(252 211 77 / 0.18); color: #FCD34D; }
+  .bmi-badge[data-level='obese'] { background: rgb(255 107 44 / 0.2); color: #FF8A57; }
+</style>
+
+<script>
+  import { initBmi } from '../../scripts/tools/bmi';
+  document.querySelectorAll<HTMLFormElement>('[data-bmi]').forEach(initBmi);
+</script>

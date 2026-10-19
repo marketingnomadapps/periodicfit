@@ -1,0 +1,24 @@
+---
+/**
+ * Two parallel tilted ribbons moving in opposite directions on scroll (data-fx="ribbons").
+ * They are stacked with a gap and share the same angle, so their text never crosses.
+ */
+interface Props { items: { e: string; t: string }[]; class?: string }
+const { items, class: className = '' } = Astro.props;
+const row = [...items, ...items, ...items, ...items];
+---
+<section data-fx="ribbons" class:list={['fx-ribbons relative overflow-hidden py-14 md:py-20', className]} aria-label="Quick facts">
+  <ul class="sr-only">{items.map((i) => <li>{i.t}</li>)}</ul>
+  <div class="-mx-[6vw] -rotate-[3deg] space-y-3 md:space-y-4" aria-hidden="true">
+    <div class="overflow-hidden bg-primary">
+      <div data-fx-ribbon class="flex w-max gap-8 py-3.5 text-night md:py-4">
+        {row.map((i) => <span class="flex shrink-0 items-center gap-3 font-display text-base font-bold md:text-2xl"><span class="text-xl md:text-3xl">{i.e}</span>{i.t}<span class="ml-5 text-night/40">✦</span></span>)}
+      </div>
+    </div>
+    <div class="overflow-hidden border-y border-line bg-surface">
+      <div data-fx-ribbon class="flex w-max gap-8 py-3.5 text-ink md:py-4">
+        {row.slice().reverse().map((i) => <span class="flex shrink-0 items-center gap-3 font-display text-base font-semibold md:text-2xl"><span class="text-xl md:text-3xl">{i.e}</span>{i.t}<span class="ml-5 text-primary">✦</span></span>)}
+      </div>
+    </div>
+  </div>
+</section>

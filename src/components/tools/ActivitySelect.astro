@@ -1,0 +1,10 @@
+---
+import { ACTIVITY } from '../../scripts/tools/common';
+interface Props { name?: string; selected?: string }
+const { name = 'activity', selected = 'moderate' } = Astro.props;
+---
+<label class="t-field mt-3"><span class="t-label">Activity level</span>
+  <select name={name} class="t-select">
+    {Object.entries(ACTIVITY).map(([k, v]) => <option value={k} selected={k === selected}>{v.label}</option>)}
+  </select>
+</label>

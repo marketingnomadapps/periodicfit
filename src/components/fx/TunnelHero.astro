@@ -1,0 +1,65 @@
+---
+/**
+ * 3D fly-through hero (data-fx="tunnel"). Layers sit at different depths (z) around the
+ * headline; scrolling moves the camera forward so near layers rush past and far ones grow.
+ * At rest, layers stay out of the central text area (x 22–78%, y 26–74% on desktop;
+ * top/bottom bands on mobile), so they never cover the copy.
+ */
+import { Image } from 'astro:assets';
+
+export interface TunnelLayer {
+  kind: 'img' | 'chip' | 'glyph';
+  img?: ImageMetadata;
+  text?: string;
+  x: number; y: number;   // desktop position in % of the scene
+  mx?: number; my?: number; // mobile position (omit = hidden on mobile)
+  z: number;              // depth in px (negative = further away)
+  w?: string;             // tailwind width/height classes for images
+  rot?: number;
+}
+interface Props { layers: TunnelLayer[]; class?: string }
+const { layers, class: className = '' } = Astro.props;
+// Perspective pulls far layers toward the vanishing point. Pre-compensate so each layer's
+// PROJECTED position at rest is exactly (x, y): pos = 50 + (want - 50) * (P - z) / P.
+const PD = 900, PM = 700;
+const proj = (want: number, z: number, P: number) => 50 + (want - 50) * (P - z) / P;
+// Mobile safety: keep layers below the header (≥18%) and above the bottom edge (≤90%).
+const myOf = (l: TunnelLayer) => Math.min(90, Math.max(18, l.my ?? l.y));
+---
+<section data-fx="tunnel" class:list={['relative', className]}>
+  <div data-fx-pin class="relative h-[100svh] min-h-[600px] overflow-hidden">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="absolute left-1/2 top-1/2 h-[80vmax] w-[80vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(198_255_61/0.14),transparent_60%)]"></div>
+      <div class="absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(rgb(244 245 247) 1px, transparent 1px); background-size: 28px 28px;"></div>
+    </div>
+    <div data-fx-scene class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div data-fx-world class="absolute inset-0">
+        {layers.map((l) => (
+          <div
+            data-fx-layer
+            data-z={l.z}
+            class:list={['tunnel-layer', l.mx === undefined && 'max-md:hidden']}
+            style={`--x:${proj(l.x, l.z, PD).toFixed(1)}%;--y:${proj(l.y, l.z, PD).toFixed(1)}%;--mx:${proj(l.mx ?? l.x, l.z, PM).toFixed(1)}%;--my:${proj(myOf(l), l.z, PM).toFixed(1)}%;transform:translate(-50%,-50%) translate3d(0,0,${l.z}px)`}
+          >
+            {l.kind === 'img' && l.img && (
+              <div class:list={['overflow-hidden rounded-[22px] shadow-2xl shadow-black/70 ring-1 ring-white/10 max-md:!h-24 max-md:!w-20', l.w ?? 'h-36 w-28 md:h-52 md:w-40']} style={`rotate:${l.rot ?? 0}deg`}>
+                <Image src={l.img} alt="" widths={[240, 420]} sizes="220px" quality={62} loading="eager" class="h-full w-full object-cover" />
+              </div>
+            )}
+            {l.kind === 'chip' && <span class="chip-glass text-xs md:text-sm" style={`rotate:${l.rot ?? 0}deg`}>{l.text}</span>}
+            {l.kind === 'glyph' && <span class="block select-none whitespace-nowrap font-display text-[22vw] font-bold leading-none tracking-[-0.05em] text-transparent md:text-[12vw]" style="-webkit-text-stroke: 1.5px rgb(198 255 61 / 0.22);">{l.text}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+    <div data-fx-front class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+      <slot />
+    </div>
+    <p data-fx-hint class="pointer-events-none absolute bottom-5 left-1/2 z-10 -translate-x-1/2 text-xs uppercase tracking-[0.2em] text-muted max-md:hidden" aria-hidden="true">Scroll to fly in ↓</p>
+  </div>
+</section>
+
+<style>
+  .tunnel-layer { left: var(--x); top: var(--y); }
+  @media (max-width: 767px) { .tunnel-layer { left: var(--mx); top: var(--my); } }
+</style>

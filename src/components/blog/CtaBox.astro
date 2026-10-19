@@ -1,0 +1,14 @@
+---
+/** Soft CTA inside articles: a button only, never an auto popup (protects reading UX and AdSense). */
+interface Props { service?: string; title?: string; text?: string }
+const { service = '', title = 'Want a plan made for you?', text = 'Get a custom training or diet plan from a real coach. Your first call is free.' } = Astro.props;
+---
+<aside class="my-10 overflow-hidden rounded-[24px] bg-night p-6 text-ink md:p-8" aria-label="Free consultation">
+  <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+    <div>
+      <p class="font-display text-2xl font-bold tracking-tight">{title}</p>
+      <p class="mt-1.5 max-w-md text-sm text-ink/75">{text}</p>
+    </div>
+    <button type="button" data-open-inquiry data-service={service} class="btn-primary shrink-0">Book Free Consultation →</button>
+  </div>
+</aside>

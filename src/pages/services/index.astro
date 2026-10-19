@@ -1,0 +1,50 @@
+---
+import MarketingLayout from '../../layouts/MarketingLayout.astro';
+import Services from '../../components/home/Services.astro';
+import SvcContact from '../../components/service/SvcContact.astro';
+import FAQ from '../../components/FAQ.astro';
+import Icon from '../../components/Icon.astro';
+import { HOME_FAQ } from '../../data/home';
+---
+<MarketingLayout title="Services" description="Online personal training, custom diet plans, dietitian consultations and goal-based programs. Explore every PeriodicFit service and book a free consultation." transparentHeader={false}>
+  <section class="relative overflow-hidden pb-10 pt-16 md:pb-6 md:pt-24">
+    <div class="container-pf">
+      <nav aria-label="Breadcrumb" class="mb-6 text-xs text-muted"><ol class="flex gap-1.5"><li><a href="/" class="hover:text-primary">Home</a></li><li aria-hidden="true">/</li><li aria-current="page" class="text-ink/80">Services</li></ol></nav>
+      <h1 class="svc-heading max-w-5xl font-display text-[clamp(2.8rem,8vw,7.5rem)] font-bold leading-[0.92] tracking-[-0.04em]">Pick your path. <span class="text-primary">We'll plan the rest.</span></h1>
+      <div class="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <p class="max-w-xl text-lg text-ink/75">Eight ways to train, eat and recover better, all coached by real people and built around your life.</p>
+        <a href="#contact" data-open-inquiry class="btn-primary self-start">Not sure? Ask a coach <Icon name="arrow-right" size={16} /></a>
+      </div>
+    </div>
+  </section>
+  <Services />
+  <SvcContact slug="" name="the right service for you" />
+  <FAQ items={HOME_FAQ} />
+</MarketingLayout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+  const mm = gsap.matchMedia();
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    // Stacking cards
+    const cards = gsap.utils.toArray<HTMLElement>('.svc-card');
+    cards.forEach((card, i) => {
+      gsap.fromTo(card.querySelector('.svc-media'), { yPercent: -7 }, { yPercent: 7, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: true } });
+      const next = cards[i + 1];
+      if (!next) return;
+      const st = { trigger: next, start: 'top bottom', end: 'top 15%', scrub: true };
+      gsap.to(card.querySelector('.svc-inner'), { scale: 0.9 + i * 0.006, ease: 'none', scrollTrigger: st });
+      gsap.to(card.querySelector('.svc-shade'), { opacity: 0.65, ease: 'none', scrollTrigger: st });
+    });
+    // Headings flip in
+    gsap.utils.toArray<HTMLElement>('.svc-heading, .split-heading').forEach((h) => {
+      const words = SplitText.create(h, { type: 'words' }).words;
+      gsap.set(words, { display: 'inline-block', transformOrigin: '50% 100%' });
+      gsap.from(words, { rotateX: -95, yPercent: 40, opacity: 0, stagger: 0.05, duration: 0.9, ease: 'back.out(1.4)', scrollTrigger: { trigger: h, start: 'top 88%', once: true } });
+    });
+    gsap.from('.sc-form', { y: 80, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '#contact', start: 'top 70%', once: true } });
+  });
+</script>

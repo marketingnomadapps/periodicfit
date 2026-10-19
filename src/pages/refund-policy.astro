@@ -1,0 +1,38 @@
+---
+// TODO: confirm every period and condition with the client before launch (pricing is not final yet).
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { CONTACT, SITE } from '../config/site';
+---
+<LegalLayout title="Refund Policy" label="Refunds" description={`Refunds and cancellations for ${SITE.name} coaching and plans.`} intro="Fair, simple and written in plain language. If something isn't right, talk to us first. We'll make it right where we can.">
+  <h2>Free consultation</h2>
+  <p>Your first consultation call is free. You never pay to talk to us.</p>
+
+  <h2>Coaching subscriptions</h2>
+  <ul>
+    <li>You can cancel at any time before your next billing date. You keep access until the end of the period you've paid for.</li>
+    <li>If you cancel within <strong>7 days</strong> of your first payment and we haven't delivered your custom plan yet, you get a full refund.</li>
+    <li>Once your custom plan has been delivered, the current billing period is non-refundable, because the plan is made specifically for you.</li>
+  </ul>
+
+  <h2>One-time plans and consultations</h2>
+  <ul>
+    <li><strong>Custom diet or workout plans:</strong> full refund if you cancel before we start building your plan. After delivery, we'll revise the plan free of charge if it doesn't fit you, instead of refunding.</li>
+    <li><strong>Dietitian consultations:</strong> reschedule for free with at least 24 hours' notice. Missed sessions without notice are not refunded.</li>
+  </ul>
+
+  <h2>Fixed-length programs</h2>
+  <p>For programs paid upfront (such as a 12-week program), you can request a refund for the unused full months within the first 14 days. After that, the program is non-refundable, but you can pause it once for up to 4 weeks for illness, travel or injury.</p>
+
+  <h2>When we'll always refund</h2>
+  <ul>
+    <li>We can't deliver the service you paid for.</li>
+    <li>You were charged twice or charged by mistake.</li>
+    <li>A medical professional advises you not to continue, and you let us know with written confirmation (we refund unused time).</li>
+  </ul>
+
+  <h2>How to request a refund</h2>
+  <p>Email <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> with your name, the email or phone number you signed up with, and the reason. We reply within 2 working days. Approved refunds go back to your original payment method within 7–10 working days, depending on your bank.</p>
+
+  <h2>Questions</h2>
+  <p>Not sure if you qualify? Just ask. We'd rather sort it out than leave you unhappy.</p>
+</LegalLayout>
